@@ -5,6 +5,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,6 +17,7 @@ namespace Osu2Saber.ViewModel
         string statusText = "Select an osz file first.";
         string workDir = "";
         bool canProcess = false;
+        bool isWorkDirSpecified = false;
 
         BatchProcessor bp;
 
@@ -68,6 +70,7 @@ namespace Osu2Saber.ViewModel
             var res = fbd.ShowDialog();
             if (res != DialogResult.OK) return;
             WorkDir = fbd.SelectedPath;
+            isWorkDirSpecified = true;
         }
 
         private void ClearList()
@@ -91,9 +94,10 @@ namespace Osu2Saber.ViewModel
             {
                 foreach (var fileName in ofd.FileNames) OszFiles.Add(fileName);
                 StatusText = "Now, process the osz file.";
+                if (!isWorkDirSpecified)
+                    WorkDir = Path.GetDirectoryName(OszFiles[0]);
+                CanProcess = true;
             }
-            WorkDir = Path.GetDirectoryName(OszFiles[0]);
-            CanProcess = true;
         }
 
         int CalcProgress()
@@ -112,7 +116,19 @@ namespace Osu2Saber.ViewModel
             await bp.BatchProcess();
             bp.PropertyChanged -= ModelChanged;
             StatusText = "Batch process completed.";
+            OpenOutputDir();
             CanProcess = true;
+        }
+
+        void OpenOutputDir()
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = bp.OutputDir,
+                FileName = "explorer.exe"
+            };
+
+            Process.Start(startInfo);
         }
 
         private void ModelChanged(object sender, PropertyChangedEventArgs e)

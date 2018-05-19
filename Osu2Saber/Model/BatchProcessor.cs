@@ -14,6 +14,7 @@ namespace Osu2Saber.Model
 
         public string[] TargetFiles { private set; get; }
         public string WorkDir { private set; get; }
+        public string OutputDir { private set; get; }
 
         public double Progress
         {
@@ -73,6 +74,7 @@ namespace Osu2Saber.Model
                 .Select((e, i) => oszp.LoadOsuFile(i))
                 .Select(osuFile => o2b.AddBeatmap(osuFile))
                 .Where(jsonPath => jsonPath != null).ToArray();
+            OutputDir = Osu2BsConverter.WorkDir;
             ReportProgress(0.2);
             return o2b;
         }
