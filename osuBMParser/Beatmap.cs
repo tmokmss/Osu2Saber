@@ -54,6 +54,8 @@ namespace osuBMParser
 
         #region events
         // I'll do this later :p
+        public string ImageFileName { get; set; }
+        public string VideoFileName { get; set; }
         #endregion
 
         #region timingPoints

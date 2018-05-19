@@ -133,6 +133,9 @@ namespace osuBMParser
                 case OsuFileSection.DIFFICULTY:
                     normalParse(data);
                     break;
+                case OsuFileSection.EVENTS:
+                    eventParse(data);
+                    break;
                 case OsuFileSection.TIMINGPOINTS:
                     timingPointParse(data);
                     break;
@@ -193,6 +196,18 @@ namespace osuBMParser
 
         }
 
+        private void eventParse(string data)
+        {
+            string[] tokens = data.Split(',');
+            if (tokens.Length < 3) return;
+            if (tokens[0]=="Video")
+            {
+                beatmap.VideoFileName = tokens[2].Trim('"');
+            } else if (tokens[2].StartsWith("\""))
+            {
+                beatmap.ImageFileName = tokens[2].Trim('"');
+            }
+        }
 
         private void timingPointParse(string data)
         {
