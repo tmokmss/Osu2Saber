@@ -51,7 +51,7 @@ namespace Osu2Saber.Model
             {
                 InitializeInfo(org);
             }
-            if (info.difficultyLevels.Count > MaxNumOfBeatmap) return null;
+            if (info.difficultyLevels.Count >= MaxNumOfBeatmap) return null;
             var map = GenerateMap(org);
             var jsonPath = AddDifficulty(org);
             var mapPath = Path.Combine(OutDir, jsonPath);
