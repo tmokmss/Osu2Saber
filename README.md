@@ -17,6 +17,7 @@ This software converts osu beatmap files (*.osu) to Beat Saber beatmap files.
     * If you can handle C#, you can fully customize it by editing [Osu2Saber.Model.Algorithm.ConvertAlgorithm.Convert](https://github.com/tmokmss/Osu2Saber/blob/master/Osu2Saber/Model/Algorithm/ConvertAlgorithm.cs) method :)
 * The ogg library seems a bit slow and the output quality is bad. We may find faster conversion (mp3 to ogg) method for heavy users.
 * The difficulty levels are messy, as osu! mappers use variety of words for describing their difficulty.
+* Fade out a song and quit after all the notes are delivered.
 * And your feedback are totally welcome!
 
 ## Dependency
