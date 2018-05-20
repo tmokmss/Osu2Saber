@@ -77,6 +77,7 @@ namespace Osu2Saber.ViewModel
         {
             OszFiles.Clear();
             WorkDir = "";
+            CanProcess = false;
         }
 
         void SelectFile()
@@ -111,6 +112,7 @@ namespace Osu2Saber.ViewModel
         async void ProcessBatch()
         {
             CanProcess = false;
+            StatusText = "Started processing.";
             bp = new BatchProcessor(OszFiles.ToArray(), WorkDir);
             bp.PropertyChanged += ModelChanged;
             await bp.BatchProcess();
