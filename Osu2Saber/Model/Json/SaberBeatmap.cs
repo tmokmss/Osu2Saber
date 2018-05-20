@@ -54,9 +54,19 @@ namespace Osu2Saber.Model.Json
 
     public enum Line
     {
+        Left = 0,
+        MiddleLeft,
+        MiddleRight,
+        Right,
+        MaxNum
+    }
+
+    public enum Layer
+    {
         Bottom = 0,
         Middle,
-        Top
+        Top,
+        MaxNum
     }
 
     public enum CutDirection
@@ -76,7 +86,7 @@ namespace Osu2Saber.Model.Json
     {
         Red = 0,
         Blue,
-        Mine
+        Mine = 3
     }
 
     public enum ObstacleType
@@ -98,14 +108,31 @@ namespace Osu2Saber.Model.Json
 
         RotatingLeftLasers = 12,
         RotatingRightLasers
-
     }
 
-    public enum LineLayer
+    public enum EventLightValue
     {
-        Bottom = 0,
-        Middle,
-        Top
+        Off = 0,
+        BlueOn,
+        BlueFlashStay,
+        BlueFlashFade,
+        RedOn = 5,
+        RedFlashStay,
+        RedFlashFade
     }
+
+    public enum EventRotationValue
+    {
+        Stop = 0,
+        Speed1,
+        Speed2,
+        Speed3,
+        Speed4,
+        Speed5,
+        Speed6,
+        Speed7,
+        Speed8
+    }
+
 
 }
