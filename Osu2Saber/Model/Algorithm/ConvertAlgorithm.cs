@@ -17,6 +17,7 @@ namespace Osu2Saber.Model.Algorithm
         protected List<Obstacle> obstacles = new List<Obstacle>();
         protected List<Note> notes = new List<Note>();
         protected int bpm;
+        protected int offset;
 
         public List<Event> Events => events;
         public List<Obstacle> Obstacles => obstacles;
@@ -27,6 +28,7 @@ namespace Osu2Saber.Model.Algorithm
             org = osu;
             dst = bs;
             bpm = dst._beatsPerMinute;
+            offset = osu.TimingPoints[0].Offset;
         }
 
         // You may override this method for better map generation
@@ -55,7 +57,7 @@ namespace Osu2Saber.Model.Algorithm
                 // turn off lights while break
                 var startTime = ConvertTime(bp.BeginTime);
                 var endTime = ConvertTime(bp.EndTime);
-                var colorOfs = (bp.BeginTime / 100) % 2 == 0 ? 4 : 0;  // pseudo-randomly choose color
+                var color = (bp.BeginTime / 100) % 2 == 0 ? EventLightValue.BlueOn : EventLightValue.RedOn;  // pseudo-randomly choose color
 
                 var ev = new Event(startTime, EventType.LightTrackRingNeons, EventLightValue.Off);
                 events.Add(ev);
@@ -70,29 +72,32 @@ namespace Osu2Saber.Model.Algorithm
 
                 ev = new Event(endTime, EventType.RotationAllTrackRings, EventRotationValue.Stop);
                 events.Add(ev);
-                ev = new Event(endTime, EventType.LightBottomBackSideLasers, EventLightValue.BlueOn + colorOfs);
+                ev = new Event(endTime, EventType.LightTrackRingNeons, color + 1);
                 events.Add(ev);
             }
 
-
+            var lastTpTime = -1000000;
+            const int NegligibleTimeDiff = 500;
             foreach (var tp in org.TimingPoints)
             {
-                var colorOfs = (tp.Offset / 100) % 2 == 0 ? 4 : 0;  // pseudo-randomly choose color
+                var color = (tp.Offset / 100) % 2 == 0 ? EventLightValue.BlueOn : EventLightValue.RedOn;  // pseudo-randomly choose color
                 var bpmFac = tp.MsPerBeat > 0 ? 1 : -tp.MsPerBeat / 100.0;
-                var speed = CalcSpeedFromBpm(bpmFac);   // maybe use for rotation speed
+                var speed = CalcSpeedFromBpm(bpmFac);   // maybe used for rotation speed
                 var time = ConvertTime(tp.Offset);  // time in BS
 
-                var ev = new Event(time, EventType.LightBottomBackSideLasers, EventLightValue.BlueOn + colorOfs);
+                var ev = new Event(time, EventType.LightBottomBackSideLasers, color);
+                events.Add(ev);
+                ev = new Event(time, EventType.RotationSmallTrackRings, EventRotationValue.Speed5);
                 events.Add(ev);
 
 
                 if (tp.KiaiMode)
                 {
-                    ev = new Event(time, EventType.LightTrackRingNeons, EventLightValue.BlueOn + colorOfs);
+                    ev = new Event(time, EventType.LightTrackRingNeons, Inverse(color));
                     events.Add(ev);
-                    ev = new Event(time, EventType.LightRightLasers, EventLightValue.BlueOn + colorOfs);
+                    ev = new Event(time, EventType.LightRightLasers, color);
                     events.Add(ev);
-                    ev = new Event(time, EventType.LightLeftLasers, EventLightValue.BlueOn + colorOfs);
+                    ev = new Event(time, EventType.LightLeftLasers, Inverse(color));
                     events.Add(ev);
                     ev = new Event(time, EventType.RotatingLeftLasers, speed);
                     events.Add(ev);
@@ -100,9 +105,14 @@ namespace Osu2Saber.Model.Algorithm
                     events.Add(ev);
                 }
 
-                if (tp.Volume > lastVolume)
+                else if (tp.Offset - lastTpTime < NegligibleTimeDiff)
                 {
-                    ev = new Event(time, EventType.LightBackTopLasers, EventLightValue.BlueOn + colorOfs);
+                    // do nothing because the last event is too close
+                }
+
+                else if (tp.Volume > lastVolume)
+                {
+                    ev = new Event(time, EventType.LightBackTopLasers, color);
                     events.Add(ev);
                 }
                 else
@@ -114,6 +124,7 @@ namespace Osu2Saber.Model.Algorithm
                 }
 
                 lastVolume = tp.Volume;
+                lastTpTime = tp.Offset;
             }
             events = events.OrderBy(ev => ev._time).ToList();
         }
@@ -129,11 +140,19 @@ namespace Osu2Saber.Model.Algorithm
             return speed;
         }
 
+        EventLightValue Inverse(EventLightValue color)
+        {
+            if ((int)color >= 4)
+                return color - 4;
+            else
+                return color + 4;
+        }
+
         protected double ConvertTime(int timeMs)
         {
             var unit = 60.0 / bpm / 8.0;
-            var sectionIdx = (int)(timeMs / 1000.0 / unit);
-            return sectionIdx / 8.0;
+            var sectionIdx = (int)Math.Round(((timeMs) / 1000.0 / unit));
+            return Math.Round(sectionIdx / 8.0, 3, MidpointRounding.AwayFromZero);
         }
 
         (int line, int layer) DeterminePosition(float x, float y)

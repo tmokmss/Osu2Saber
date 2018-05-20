@@ -113,7 +113,7 @@ namespace Osu2Saber.Model
                 previewStartTime = org.PreviewTime / 1000,
                 previewDuration = 10,
                 coverImagePath = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
-                environmentName = "NiceEnvironment",
+                environmentName = "DefaultEnvironment", // There is "NiceEnvironment" too
             };
 
             Mp3Path = Path.Combine(OrgDir, org.AudioFileName);
@@ -136,7 +136,7 @@ namespace Osu2Saber.Model
         {
             var map = new SaberBeatmap()
             {
-                _version = "1.0.0",
+                _version = org.Version,
                 _beatsPerMinute = CalcOriginalBPM(org),
                 _beatsPerBar = 16,
                 _noteJumpSpeed = 10,
@@ -157,7 +157,7 @@ namespace Osu2Saber.Model
         {
             var tp = org.TimingPoints[0];
             var mpb = tp.MsPerBeat;
-            return (int)Math.Ceiling(1000.0 / mpb * 60);
+            return (int)Math.Round(1000.0 / mpb * 60);
         }
 
         (string str, int rank) DetermineMapDifficulty(int idx)
