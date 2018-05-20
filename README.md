@@ -18,7 +18,6 @@ This software converts osu beatmap files (*.osu) to Beat Saber beatmap files.
 * The ogg library seems a bit slow and the output quality is bad. We may find faster conversion (mp3 to ogg) method for heavy users.
 * The difficulty levels are messy, as osu! mappers use variety of words for describing their difficulty.
 * Fade out a song and quit after all the notes are delivered.
-* Some beatmap aren't loaded in game. The reason is still unknown.
 * And your feedback are totally welcome!
 
 ## Dependency
