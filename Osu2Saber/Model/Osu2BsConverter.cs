@@ -136,7 +136,8 @@ namespace Osu2Saber.Model
         {
             var map = new SaberBeatmap()
             {
-                _version = org.Version,
+                _origin = org.Version,
+                _version = "1.5.0",
                 _beatsPerMinute = CalcOriginalBPM(org),
                 _beatsPerBar = 16,
                 _noteJumpSpeed = 10,

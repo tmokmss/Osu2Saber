@@ -67,7 +67,7 @@ namespace Osu2Saber.Model.Algorithm
                 events.Add(ev);
                 ev = new Event(startTime, EventType.LightLeftLasers, EventLightValue.Off);
                 events.Add(ev);
-                ev = new Event(startTime, EventType.RotationAllTrackRings, EventRotationValue.Speed3);
+                ev = new Event(startTime, EventType.RotationAllTrackRings, 1);
                 events.Add(ev);
 
                 ev = new Event(endTime, EventType.RotationAllTrackRings, EventRotationValue.Stop);
@@ -87,7 +87,7 @@ namespace Osu2Saber.Model.Algorithm
 
                 var ev = new Event(time, EventType.LightBottomBackSideLasers, color);
                 events.Add(ev);
-                ev = new Event(time, EventType.RotationSmallTrackRings, EventRotationValue.Speed5);
+                ev = new Event(time, EventType.RotationSmallTrackRings, 1);
                 events.Add(ev);
 
 
@@ -158,8 +158,8 @@ namespace Osu2Saber.Model.Algorithm
         (int line, int layer) DeterminePosition(float x, float y)
         {
             // just map notes position to BS screen
-            var line = (int)Math.Floor(x / OsuScreenXMax * (double)Line.MaxNum);
-            var layer = (int)Math.Floor(y / OsuScreenYMax * (double)Layer.MaxNum);
+            var line = (int)Math.Floor(x / (OsuScreenXMax + 1) * (double)Line.MaxNum);
+            var layer = (int)Math.Floor(y / (OsuScreenYMax + 1) * (double)Layer.MaxNum);
             layer = SlideLayer(line, layer, y);
             return (line: line, layer: layer);
         }
@@ -172,7 +172,7 @@ namespace Osu2Saber.Model.Algorithm
 
             // The larger this value is, the less likely notes appear in center middle.
             var fineSection = 12;
-            var layerIdx = (int)Math.Floor(y / OsuScreenYMax * fineSection);
+            var layerIdx = (int)Math.Floor(y / (OsuScreenYMax + 1) * fineSection);
             if (layerIdx == fineSection / 2) return layer;
             if (layerIdx < fineSection / 2) return (int)Layer.Bottom;
             return (int)Layer.Top;
