@@ -8,7 +8,7 @@ namespace Osu2Saber.Model.Json
 {
     /// <summary>
     /// This class contains all the required information for info.json.
-    /// The format of the json file is described partially in the following document:
+    /// The format of the json file is described partially in the following documents:
     /// https://steamcommunity.com/groups/ModSaber#announcements/detail/1653262779995763262
     /// </summary>
     public class SaberInfo

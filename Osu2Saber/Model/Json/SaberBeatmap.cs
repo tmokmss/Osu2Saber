@@ -10,9 +10,9 @@ namespace Osu2Saber.Model.Json
     /// This class contains all the required information for [difficulty].json, namely BS beatmap file.
     /// The enum definitions are retrieved from some reverse engineering work.
     /// 
-    /// Note:
-    /// * the unit of time in BS is second
-    /// * 
+    /// Reference: 
+    /// https://pastebin.com/cTPGrxWY
+    /// https://docs.google.com/spreadsheets/d/1vCTlDvx0ZW8NkkZBYW6ecvXaVRxDUKX7QIoah9PCp_c/htmlview
     /// </summary>
     public class SaberBeatmap
     {
@@ -32,6 +32,21 @@ namespace Osu2Saber.Model.Json
         public double _time;
         public int _type;
         public int _value;
+
+        public Event(double time, EventType type, EventLightValue value)
+        {
+            _time = time; _type = (int)type; _value = (int)value;
+        }
+
+        public Event(double time, EventType type, EventRotationValue value)
+        {
+            _time = time; _type = (int)type; _value = (int)value;
+        }
+
+        public Event(double time, EventType type, int value)
+        {
+            _time = time; _type = (int)type; _value = value;
+        }
     }
 
     public class Note
@@ -41,6 +56,17 @@ namespace Osu2Saber.Model.Json
         public int _lineLayer;
         public int _type;
         public int _cutDirection;
+
+        public Note(double time, Line line, Layer layer, NoteType type, CutDirection cutDirection)
+        {
+            _time = time; _lineIndex = (int)line; _lineLayer = (int)layer; _type = (int)type;
+            _cutDirection = (int)cutDirection;
+        }
+
+        public Note(double time, int line, int layer, NoteType type, CutDirection cutDirection)
+        {
+            _time = time; _lineIndex = line; _lineLayer = layer; _type = (int)type; _cutDirection = (int)cutDirection;
+        }
     }
 
     public class Obstacle
@@ -48,8 +74,13 @@ namespace Osu2Saber.Model.Json
         public double _time;
         public int _lineIndex;
         public int _type;
-        public int _duration;
+        public float _duration;
         public int _width;
+        
+        public Obstacle(double time, Line line, ObstacleType type, float duration, int width)
+        {
+            _time = time; _lineIndex = (int)line; _type = (int)type; _duration = duration; _width = width;
+        }
     }
 
     public enum Line
@@ -97,14 +128,14 @@ namespace Osu2Saber.Model.Json
 
     public enum EventType
     {
-        BlackTopLasers = 0,
-        TrackRingNeons,
-        LeftLasers,
-        RightLasers,
-        BotBackSideLasers,
+        LightBackTopLasers = 0,
+        LightTrackRingNeons,
+        LightLeftLasers,
+        LightRightLasers,
+        LightBottomBackSideLasers,
 
-        AllTrackRings = 8,
-        SmallTrackRings,
+        RotationAllTrackRings = 8,
+        RotationSmallTrackRings,
 
         RotatingLeftLasers = 12,
         RotatingRightLasers
@@ -133,6 +164,4 @@ namespace Osu2Saber.Model.Json
         Speed7,
         Speed8
     }
-
-
 }
