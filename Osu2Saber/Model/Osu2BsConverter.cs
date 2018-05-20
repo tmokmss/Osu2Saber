@@ -83,7 +83,7 @@ namespace Osu2Saber.Model
                 beatsPerMinute = CalcOriginalBPM(org),
                 previewStartTime = org.PreviewTime / 1000,
                 previewDuration = 10,
-                coverImagePath = org.ImageFileName,
+                coverImagePath = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
                 environmentName = "NiceEnvironment",
             };
 

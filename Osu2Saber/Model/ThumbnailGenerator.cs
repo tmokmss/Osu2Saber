@@ -9,6 +9,7 @@ namespace Osu2Saber.Model
     class ThumbnailGenerator
     {
         public static int TargetHeight { set; get; } = 512;
+        public readonly static string DefaultExtension = "jpg";
 
         public static void GenerateThumbnail(string imgPath, string outputDir)
         {
@@ -25,13 +26,13 @@ namespace Osu2Saber.Model
                 // 画像ファイル内の1フレーム目を取り出す (通常1フレームしかない)
                 var bitmapSource = decoder.Frames[0];
 
-                double maxEdgeLen = Math.Max(bitmapSource.PixelHeight, bitmapSource.PixelWidth);
-                var scale = TargetHeight / maxEdgeLen; // 拡大率
+                double minEdgeLen = Math.Min(bitmapSource.PixelHeight, bitmapSource.PixelWidth);
+                var scale = TargetHeight / minEdgeLen; // 拡大率
 
                 // 拡大・縮小されたビットマップを作成する
                 var scaledBitmapSource = new TransformedBitmap(bitmapSource, new ScaleTransform(scale, scale));
 
-                var extension = ".jpg";
+                var extension = "." + DefaultExtension;
                 var encoder =
                     extension == ".png" ? new PngBitmapEncoder() :
                     extension == ".jpg" ? new JpegBitmapEncoder() :
