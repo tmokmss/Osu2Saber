@@ -207,6 +207,10 @@ namespace osuBMParser
                 beatmap.VideoFileName = tokens[2].Trim('"');
                 return;
             }
+            else if (tokens[0] == "0" && tokens[1] == "0")
+            {
+                beatmap.ImageFileName = tokens[2].Trim('"');
+            }
             else if (tokens[0] == "2")
             {
                 var breakPeriod = new BreakPeriod
@@ -216,12 +220,6 @@ namespace osuBMParser
                 };
                 beatmap.BreakPeriods.Add(breakPeriod);
                 return;
-            }
-
-            if (tokens.Length < 5) return;
-            if (tokens[0] == "0" && tokens[1] == "0" && tokens[3] == "0" && tokens[4] == "0")
-            {
-                beatmap.ImageFileName = tokens[2].Trim('"');
             }
         }
 
