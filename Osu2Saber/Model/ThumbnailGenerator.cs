@@ -16,6 +16,8 @@ namespace Osu2Saber.Model
             // Reference:
             // http://note-sharp.blogspot.jp/2014/09/var-dir-cimages-parallel.html
 
+            if (!File.Exists(imgPath)) return;
+
             // ファイルを開いて Stream オブジェクトを作成
             using (var sourceStream = File.OpenRead(imgPath))
             {
