@@ -17,6 +17,7 @@ namespace Osu2Saber.Model
     class Osu2BsConverter
     {
         static readonly string MapDirName = "output";
+        static Formatting formatting = Formatting.Indented;
         static string workDir;
         public static string WorkDir
         {
@@ -27,11 +28,15 @@ namespace Osu2Saber.Model
             }
             get => workDir;
         }
+        public static double MinimumDifficulty { set; get; } = 0;
+        public static double MaximumDifficulty { set; get; } = 10;
+        public static bool PreferHarder { set; get; }
 
         const string InfoFileName = "info.json";
         const int MaxNumOfBeatmap = 5;
 
         SaberInfo info;
+        List<Beatmap> beatmaps = new List<Beatmap>();
 
         public string OrgDir { private set; get; }
         public string OutDir { private set; get; }
@@ -45,27 +50,25 @@ namespace Osu2Saber.Model
             Directory.CreateDirectory(OutDir);
         }
 
-        public string AddBeatmap(Beatmap org)
+        public void AddBeatmap(Beatmap org)
         {
-            if (info == null)
+            beatmaps.Add(org);
+        }
+
+        public void ProcessAll()
+        {
+            SortAndPickBeatmaps();
+            InitializeInfo(beatmaps[0]);
+            for (var i=0; i<beatmaps.Count; i++)
             {
-                InitializeInfo(org);
+                ConvertBeatmap(i);
             }
-            if (info.difficultyLevels.Count >= MaxNumOfBeatmap) return null;
-            var map = GenerateMap(org);
-            var jsonPath = AddDifficulty(org);
-            var mapPath = Path.Combine(OutDir, jsonPath);
-            using (var sw = new StreamWriter(mapPath, false, Encoding.UTF8))
-            {
-                sw.Write(map);
-            }
-            return jsonPath;
         }
 
         public void GenerateInfoFile(string audioFileName)
         {
             info.ChangeAudioPath(audioFileName);
-            var infoJson = JsonConvert.SerializeObject(info, Formatting.Indented);
+            var infoJson = JsonConvert.SerializeObject(info, formatting);
             var infoPath = Path.Combine(OutDir, InfoFileName);
             using (var sw = new StreamWriter(infoPath, false, Encoding.UTF8))
             {
@@ -73,8 +76,34 @@ namespace Osu2Saber.Model
             }
         }
 
+        void SortAndPickBeatmaps()
+        {
+            beatmaps = beatmaps.OrderBy(beatmap => beatmap.HitObjects.Count).ToList();
+            if (beatmaps.Count <= MaxNumOfBeatmap) return;
+
+            if (PreferHarder)
+                beatmaps = beatmaps.Skip(beatmaps.Count - MaxNumOfBeatmap).ToList();
+            else
+                beatmaps = beatmaps.Take(MaxNumOfBeatmap).ToList();
+        }
+
+        void ConvertBeatmap(int index)
+        {
+            var org = beatmaps[index];
+            var map = GenerateMap(org);
+            var jsonPath = AddDifficulty(index);
+            var mapPath = Path.Combine(OutDir, jsonPath);
+            using (var sw = new StreamWriter(mapPath, false, Encoding.UTF8))
+            {
+                sw.Write(map);
+            }
+        }
+
         void InitializeInfo(Beatmap org)
         {
+            if (org.ImageFileName == null)
+                org.ImageFileName = "default.jpg";
+
             info = new SaberInfo
             {
                 songName = org.Title,
@@ -91,13 +120,13 @@ namespace Osu2Saber.Model
             ImagePath = Path.Combine(OrgDir, org.ImageFileName);
         }
 
-        string AddDifficulty(Beatmap org)
+        string AddDifficulty(int index)
         {
-            var diffi = DetermineMapDifficulty(org.Version);
-            var difficulty = diffi.str;
-            var difficultyRank = diffi.rank;
-            var audioPath = org.AudioFileName.Replace("mp3", "wav");
-            var jsonPath = diffi.str + ".json";
+            var (diff, rank) = DetermineMapDifficulty(index);
+            var difficulty = diff;
+            var difficultyRank = rank;
+            var audioPath = "";  // determined later
+            var jsonPath = diff + ".json";
             var offset = 0;
             info.AddDifficultyLevels(difficulty, difficultyRank, audioPath, jsonPath, offset);
             return jsonPath;
@@ -120,7 +149,7 @@ namespace Osu2Saber.Model
             map._events = ca.Events;
             map._obstacles = ca.Obstacles;
             map._notes = ca.Notes;
-            var json = JsonConvert.SerializeObject(map, Formatting.Indented);
+            var json = JsonConvert.SerializeObject(map, formatting);
             return json;
         }
 
@@ -131,29 +160,16 @@ namespace Osu2Saber.Model
             return (int)Math.Ceiling(1000.0 / mpb * 60);
         }
 
-        bool isExpertTaken = false;
-        (string str, int rank) DetermineMapDifficulty(string mapName)
+        (string str, int rank) DetermineMapDifficulty(int idx)
         {
-            if (mapName.Contains("Easy"))
-            {
-                return ("Easy", 1);
-            }
-            if (mapName.Contains("Normal"))
-            {
-                return ("Normal", 2);
-            }
-            if (mapName.Contains("Hard"))
-            {
-                return ("Hard", 3);
-            }
-            if (mapName.Contains("Insane"))
-            {
-                if (isExpertTaken) return ("ExpertPlus", 5);
-                isExpertTaken = true;
-                return ("Expert", 4);
-            }
+            // prefer harder difficulty for display, cuz it looks more cool!
+            idx += MaxNumOfBeatmap - beatmaps.Count;
+            if (idx == 0) return ("Easy", 1);
+            if (idx == 1) return ("Normal", 2);
+            if (idx == 2) return ("Hard", 3);
+            if (idx == 3) return ("Expert", 4);
+            if (idx == 4) return ("ExpertPlus", 5);
             return ("Easy", 1);
         }
-
     }
 }

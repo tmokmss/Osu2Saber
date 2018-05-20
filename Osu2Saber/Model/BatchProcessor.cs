@@ -69,12 +69,16 @@ namespace Osu2Saber.Model
         Osu2BsConverter ConvertBeatmap(OszProcessor oszp)
         {
             Osu2BsConverter.WorkDir = WorkDir;
-            var o2b = new Osu2BsConverter(oszp.OutDir, oszp.OszName);
-            var output = oszp.OsuFiles
-                .Select((e, i) => oszp.LoadOsuFile(i))
-                .Select(osuFile => o2b.AddBeatmap(osuFile))
-                .Where(jsonPath => jsonPath != null).ToArray();
             OutputDir = Osu2BsConverter.WorkDir;
+            var o2b = new Osu2BsConverter(oszp.OutDir, oszp.OszName);
+
+            foreach (var osufile in oszp.LoadOsuFiles())
+            {
+                o2b.AddBeatmap(osufile);
+            }
+
+            o2b.ProcessAll();
+
             ReportProgress(0.2);
             return o2b;
         }
