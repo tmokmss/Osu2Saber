@@ -177,7 +177,8 @@ namespace osuBMParser
                         if (property.PropertyType == typeof(Boolean))
                         {
                             property.SetValue(beatmap, toBool(tokens[1].Trim()));
-                        } else if (property.PropertyType == typeof(Int32))
+                        }
+                        else if (property.PropertyType == typeof(Int32))
                         {
                             string[] intTokens = tokens[1].Split('.');
                             property.SetValue(beatmap, Convert.ChangeType(intTokens[0].Trim(), property.PropertyType));
@@ -199,11 +200,26 @@ namespace osuBMParser
         private void eventParse(string data)
         {
             string[] tokens = data.Split(',');
+
             if (tokens.Length < 3) return;
-            if (tokens[0]=="Video")
+            if (tokens[0] == "Video")
             {
                 beatmap.VideoFileName = tokens[2].Trim('"');
-            } else if (tokens[2].StartsWith("\""))
+                return;
+            }
+            else if (tokens[0] == "2")
+            {
+                var breakPeriod = new BreakPeriod
+                {
+                    BeginTime = int.Parse(tokens[1]),
+                    EndTime = int.Parse(tokens[2])
+                };
+                beatmap.BreakPeriods.Add(breakPeriod);
+                return;
+            }
+
+            if (tokens.Length < 5) return;
+            if (tokens[0] == "0" && tokens[1] == "0" && tokens[3] == "0" && tokens[4] == "0")
             {
                 beatmap.ImageFileName = tokens[2].Trim('"');
             }
@@ -238,7 +254,7 @@ namespace osuBMParser
         private void colourParse(string data)
         {
             string[] tokens = data.Split(':');
-            if (tokens.Length >= 2) 
+            if (tokens.Length >= 2)
             {
                 string[] colourValues = tokens[1].Split(',');
                 if (colourValues.Length >= 3)
@@ -384,7 +400,7 @@ namespace osuBMParser
 
         }
         #endregion
-        
+
         private int toInt(string data)
         {
             int result;

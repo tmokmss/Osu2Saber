@@ -6,7 +6,7 @@ namespace osuBMParser
 {
     public class Beatmap
     {
-        
+
         #region fields
         #region extra
         public string FormatVersion { get; set; }
@@ -38,7 +38,7 @@ namespace osuBMParser
         public string Creator { get; set; }
         public string Version { get; set; }
         public string Source { get; set; }
-        public List<string> Tags { get; set; }        
+        public List<string> Tags { get; set; }
         public int BeatmapID { get; set; }
         public int BeatmapSetID { get; set; }
         #endregion
@@ -56,14 +56,15 @@ namespace osuBMParser
         // I'll do this later :p
         public string ImageFileName { get; set; }
         public string VideoFileName { get; set; }
+        public List<BreakPeriod> BreakPeriods { get; set; }
         #endregion
 
         #region timingPoints
-        public List<TimingPoint> TimingPoints { get; set; }        
+        public List<TimingPoint> TimingPoints { get; set; }
         #endregion
 
         #region colours
-        public List<ComboColour> Colours { get; set; }      
+        public List<ComboColour> Colours { get; set; }
         #endregion
 
         #region hitObjects 
@@ -76,7 +77,7 @@ namespace osuBMParser
         {
             init();
         }
-        
+
         public Beatmap(string path) : this()
         {
             OsuFileParser parser = new OsuFileParser(path, this);
@@ -95,6 +96,7 @@ namespace osuBMParser
         {
             Bookmarks = new List<int>();
             Tags = new List<string>();
+            BreakPeriods = new List<BreakPeriod>();
             TimingPoints = new List<TimingPoint>();
             Colours = new List<ComboColour>();
             HitObjects = new List<HitObject>();
