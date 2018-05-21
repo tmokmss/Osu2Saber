@@ -107,10 +107,10 @@ namespace Osu2Saber.Model.Json
         Down,
         Right,
         Left,
-        BottomRight,
-        BottomLeft,
-        UpRight,
         UpLeft,
+        UpRight,
+        DownLeft,
+        DownRight,
         Any
     }
 
