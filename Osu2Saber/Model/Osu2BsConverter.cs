@@ -113,7 +113,8 @@ namespace Osu2Saber.Model
                 previewStartTime = org.PreviewTime / 1000,
                 previewDuration = 10,
                 coverImagePath = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
-                environmentName = "DefaultEnvironment", // There is "NiceEnvironment" too
+                //environmentName = "DefaultEnvironment", // There is "NiceEnvironment" too
+                environmentName = "NiceEnvironment", // I personally prefer this
             };
 
             Mp3Path = Path.Combine(OrgDir, org.AudioFileName);
