@@ -55,6 +55,7 @@ namespace Osu2Saber.Model.Json
         public int difficultyRank;
         public string audioPath;
         public string jsonPath;
+        public string madeby = "osu2saber";
         public int offset;
     }
 }
