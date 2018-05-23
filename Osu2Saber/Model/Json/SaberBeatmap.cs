@@ -16,7 +16,8 @@ namespace Osu2Saber.Model.Json
     /// </summary>
     public class SaberBeatmap
     {
-        public string _origin;
+        public string madeby = "osu2saber";
+        public string origin;
         public string _version;
         public int _beatsPerMinute;
         public int _beatsPerBar;
