@@ -106,8 +106,8 @@ namespace Osu2Saber.Model.Json
     {
         Up = 0,
         Down,
-        Right,
         Left,
+        Right,
         UpLeft,
         UpRight,
         DownLeft,
