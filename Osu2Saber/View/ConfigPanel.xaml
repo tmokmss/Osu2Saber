@@ -17,10 +17,11 @@
         <Label Content="Min." HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.394,0.25" Visibility="Hidden"/>
         <Slider Value="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Margin="0,42,109,0" VerticalAlignment="Top" Width="94" Maximum="{Binding MaximumDifficulty}" Visibility="Hidden"/>
         <TextBox Text="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,42,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" RenderTransformOrigin="0.673,1.457" Visibility="Hidden"/>
-        <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
         <Slider Value="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Margin="0,73,109,0" VerticalAlignment="Top" Width="94" Minimum="{Binding MinimumDifficulty}" Visibility="Hidden"/>
         <TextBox Text="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,73,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" Visibility="Hidden"/>
         <Label Content="Max." HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
+        <CheckBox IsChecked="{Binding HandleHitSlider}" Content="Don't ignore Hit Slider" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top" ToolTip="By default, hit sliders are ignored because they make a map too difficult. However, some maps get better with them. Just try it!"/>
 
     </Grid>
 </UserControl>

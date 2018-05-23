@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Prism.Mvvm;
 using Osu2Saber.Model;
+using Osu2Saber.Model.Algorithm;
 
 namespace Osu2Saber.ViewModel
 {
@@ -34,6 +35,12 @@ namespace Osu2Saber.ViewModel
         {
             set { Osu2BsConverter.PreferHarder = value; }
             get => Osu2BsConverter.PreferHarder;
+        }
+
+        public bool HandleHitSlider
+        {
+            set { ConvertAlgorithm.HandleHitSlider = value; }
+            get => ConvertAlgorithm.HandleHitSlider;
         }
     }
 }
