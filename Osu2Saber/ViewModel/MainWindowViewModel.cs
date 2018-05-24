@@ -152,12 +152,16 @@ namespace Osu2Saber.ViewModel
 
         public void Drop(IDropInfo dropInfo)
         {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>().ToList();
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>()
+                .Where(fname => fname.EndsWith(".zip") || fname.EndsWith(".osz"))
+                .ToList();
             //dropInfo.Effects = dragFileList.Any(item =>
             //{
             //    var extension = Path.GetExtension(item);
             //    return extension != null && extension.Equals(".zip");
             //}) ? DragDropEffects.Copy : DragDropEffects.None;
+
+            if (dragFileList.Count == 0) return;
 
             foreach (var file in dragFileList)
             {
@@ -165,6 +169,7 @@ namespace Osu2Saber.ViewModel
             }
             if (!isWorkDirSpecified)
                 WorkDir = Path.GetDirectoryName(OszFiles[0]);
+            CanProcess = true;
         }
 
     }
