@@ -110,6 +110,11 @@ namespace Osu2Saber.Model
                 Console.WriteLine(e);
                 // Just retry
                 return ConvertMp3toOgg(mp3Path, outputDir);
+            } catch(InvalidOperationException e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Error while converting to " + oggName);
+                return oggName;
             }
             return oggName;
         }

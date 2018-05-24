@@ -151,6 +151,7 @@ namespace osuBMParser
         private void normalParse(string data)
         {
             string[] tokens = data.Split(':');
+            if (tokens[1] == " ") return;
 
             switch (tokens[0].ToLower().Trim())
             {

@@ -1,5 +1,6 @@
 ﻿using Ionic.Zip;
 using osuBMParser;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -66,14 +67,22 @@ namespace Osu2Saber.Model
         {
             if (index < 0 || index >= OsuFiles.Length) return null;
             var filePath = Path.Combine(OutDir, OsuFiles[index]);
-            var bm = new Beatmap(filePath);
+            Beatmap bm = null;
+                bm = new Beatmap(filePath);
+            try
+            {
+            } catch(FormatException e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Error while parsing " + filePath);
+            }
             return bm;
         }
 
         public Beatmap[] LoadOsuFiles()
         {
             var beatmaps = OsuFiles
-                .Select((e, i) => LoadOsuFile(i)).ToArray();
+                .Select((e, i) => LoadOsuFile(i)).Where(map => map != null).ToArray();
             return beatmaps;
         }
 
