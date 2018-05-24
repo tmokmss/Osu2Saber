@@ -279,6 +279,8 @@ namespace Osu2Saber.Model.Algorithm
                 else if (tp.Offset - lastTpTime < NegligibleTimeDiffMs)
                 {
                     // do nothing because the last event is too close
+                    lastVolume = tp.Volume;
+                    continue;
                 }
 
                 else if (tp.Volume > lastVolume)
@@ -388,7 +390,7 @@ namespace Osu2Saber.Model.Algorithm
         }
 
         // positon difference in each axis after the specified direction of cut
-        static float Sqr2 = (float)Math.Sqrt(2);
+        static float Sqr2 = (float)Math.Sqrt(2) / 2;
         float[] lineDiff = new float[] { 0, 0, -1, 1, -Sqr2, Sqr2, -Sqr2, Sqr2 };
         float[] layerDiff = new float[] { 1, -1, 0, 0, Sqr2, Sqr2, -Sqr2, -Sqr2 };
 
