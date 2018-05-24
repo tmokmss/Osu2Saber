@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Osu2Saber"
+        xmlns:dd="urn:gong-wpf-dragdrop"
         xmlns:ViewModel="clr-namespace:Osu2Saber.ViewModel"
         xmlns:View="clr-namespace:Osu2Saber.View" x:Class="Osu2Saber.MainWindow"
         mc:Ignorable="d"
@@ -19,7 +20,7 @@
         <StatusBar Height="22" VerticalAlignment="Bottom">
             <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}"/>
         </StatusBar>
-        <ListBox ItemsSource="{Binding OszFiles, Mode=OneWay}" Margin="10,10,289,60"/>
+        <ListBox ItemsSource="{Binding OszFiles, Mode=OneWay}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" Margin="10,10,289,60"/>
         <ProgressBar Value="{Binding Progress, Mode=OneWay}" HorizontalAlignment="Right" Height="23" Margin="0,0,10,31" VerticalAlignment="Bottom" Width="264"/>
         <TextBox Text="{Binding WorkDir, Mode=OneWay}" Height="23" Margin="77,0,289,31" TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True"/>
         <View:ConfigPanel HorizontalAlignment="Right" Height="Auto" Margin="0,81,10,86" Width="264"/>

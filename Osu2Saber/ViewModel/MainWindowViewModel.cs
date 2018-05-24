@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using GongSolutions.Wpf.DragDrop;
+using Microsoft.Win32;
 using Osu2Saber.Model;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -8,11 +9,11 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
+using System.Windows;
 
 namespace Osu2Saber.ViewModel
 {
-    class MainWindowViewModel : BindableBase
+    class MainWindowViewModel : BindableBase, IDropTarget
     {
         string statusText = "Select an osz file first.";
         string workDir = "";
@@ -63,12 +64,12 @@ namespace Osu2Saber.ViewModel
 
         private void SelectWorkFolder()
         {
-            var fbd = new FolderBrowserDialog
+            var fbd = new System.Windows.Forms.FolderBrowserDialog
             {
                 Description = "Select working folder",
             };
             var res = fbd.ShowDialog();
-            if (res != DialogResult.OK) return;
+            if (res != System.Windows.Forms.DialogResult.OK) return;
             WorkDir = fbd.SelectedPath;
             isWorkDirSpecified = true;
         }
@@ -137,5 +138,34 @@ namespace Osu2Saber.ViewModel
         {
             RaisePropertyChanged(e.PropertyName);
         }
+
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = dragFileList.Any(item =>
+            {
+                var extension = Path.GetExtension(item);
+                return extension != null && extension.Equals(".zip");
+            }) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>().ToList();
+            //dropInfo.Effects = dragFileList.Any(item =>
+            //{
+            //    var extension = Path.GetExtension(item);
+            //    return extension != null && extension.Equals(".zip");
+            //}) ? DragDropEffects.Copy : DragDropEffects.None;
+
+            foreach (var file in dragFileList)
+            {
+                OszFiles.Add(file);
+            }
+            if (!isWorkDirSpecified)
+                WorkDir = Path.GetDirectoryName(OszFiles[0]);
+        }
+
     }
 }
