@@ -165,12 +165,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\osuBMParser\osuBMParser.csproj">
-      <Project>{92f06458-ccf1-4574-be26-a9ffe3b77310}</Project>
-      <Name>osuBMParser</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.6.1 %28x86 および x64%29</ProductName>
@@ -181,6 +175,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\osuBMParser\osuBMParser.csproj">
+      <Project>{92f06458-ccf1-4574-be26-a9ffe3b77310}</Project>
+      <Name>osuBMParser</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
