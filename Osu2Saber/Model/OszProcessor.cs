@@ -55,12 +55,7 @@ namespace Osu2Saber.Model
         void ListOsuFiles()
         {
             var filesInFull = Directory.GetFiles(OutDir, "*.osu");
-            var count = filesInFull.Length;
-            OsuFiles = new string[count];
-            for (var i = 0; i < count; i++)
-            {
-                OsuFiles[i] = Path.GetFileName(filesInFull[i]);
-            }
+            OsuFiles = filesInFull.Select(path => Path.GetFileName(path)).ToArray();
         }
 
         public Beatmap LoadOsuFile(int index)
