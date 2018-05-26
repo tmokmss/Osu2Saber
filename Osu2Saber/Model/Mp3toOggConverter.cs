@@ -7,7 +7,28 @@ namespace Osu2Saber.Model
 {
     class Mp3toOggConverter
     {
-        
+        public static string ConvertToOgg(string srcPath, string outputDir)
+        {
+            var ext = Path.GetExtension(srcPath);
+            switch (ext)
+            {
+                case ".mp3":
+                    return ConvertMp3toOgg(srcPath, outputDir);
+                default:
+                    // we give up to convert any other format for now
+                    // wav and ogg are just ok for BS though
+                    return JustCopy(srcPath, outputDir);
+            }
+        }
+
+        public static string JustCopy(string srcPath, string outputDir)
+        {
+            var fname = Path.GetFileName(srcPath);
+            var dstPath = Path.Combine(outputDir, fname);
+            File.Copy(srcPath, dstPath);
+            return fname;
+        }
+
         public static string ConvertMp3toOgg(string mp3Path, string outputDir)
         {
             var oggName = Path.GetFileNameWithoutExtension(mp3Path) + ".ogg";

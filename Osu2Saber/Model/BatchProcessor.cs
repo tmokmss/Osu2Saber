@@ -85,7 +85,7 @@ namespace Osu2Saber.Model
 
         void ConvertImgAudio(Osu2BsConverter o2b)
         {
-            var audioFileName = Mp3toOggConverter.ConvertMp3toOgg(o2b.Mp3Path, o2b.OutDir);
+            var audioFileName = Mp3toOggConverter.ConvertToOgg(o2b.AudioPath, o2b.OutDir);
             ThumbnailGenerator.GenerateThumbnail(o2b.ImagePath, o2b.OutDir);
             o2b.GenerateInfoFile(audioFileName);
             ReportProgress(0.5);

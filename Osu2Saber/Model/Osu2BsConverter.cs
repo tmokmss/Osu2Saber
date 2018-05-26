@@ -40,7 +40,7 @@ namespace Osu2Saber.Model
 
         public string OrgDir { private set; get; }
         public string OutDir { private set; get; }
-        public string Mp3Path { private set; get; }
+        public string AudioPath { private set; get; }
         public string ImagePath { private set; get; }
 
         public Osu2BsConverter(string orgDir, string outputDirName)
@@ -117,7 +117,7 @@ namespace Osu2Saber.Model
                 environmentName = "NiceEnvironment", // I personally prefer this
             };
 
-            Mp3Path = Path.Combine(OrgDir, org.AudioFileName);
+            AudioPath = Path.Combine(OrgDir, org.AudioFileName);
             ImagePath = Path.Combine(OrgDir, org.ImageFileName);
         }
 
