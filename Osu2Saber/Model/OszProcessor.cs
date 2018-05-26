@@ -68,9 +68,9 @@ namespace Osu2Saber.Model
             if (index < 0 || index >= OsuFiles.Length) return null;
             var filePath = Path.Combine(OutDir, OsuFiles[index]);
             Beatmap bm = null;
-                bm = new Beatmap(filePath);
             try
             {
+                bm = new Beatmap(filePath);
             } catch(FormatException e)
             {
                 Console.WriteLine(e);
