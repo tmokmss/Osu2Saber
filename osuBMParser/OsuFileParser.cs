@@ -151,6 +151,16 @@ namespace osuBMParser
         private void normalParse(string data)
         {
             string[] tokens = data.Split(':');
+
+            // all of the field is formatted to [key]:[value]
+            // if value contains ":", it should be concatinated after split.
+            if (tokens.Length > 2)
+            {
+                for (var i = 2; i < tokens.Length; i++)
+                {
+                    tokens[1] += ":" + tokens[i];
+                }
+            }
             if (tokens[1] == " ") return;
 
             switch (tokens[0].ToLower().Trim())
@@ -247,7 +257,7 @@ namespace osuBMParser
 
             if (tokens.Length > 7)
                 if (tokens[7] != null) timingPoint.KiaiMode = toBool(tokens[7]);
-            else timingPoint.KiaiMode = false;
+                else timingPoint.KiaiMode = false;
 
             beatmap.TimingPoints.Add(timingPoint);
 
