@@ -57,11 +57,12 @@ namespace Osu2Saber.Model
         {
             OszProcessor.WorkDir = WorkDir;
             var oszPath = TargetFiles[index];
-            var oszp = new OszProcessor(oszPath);
             if (!oszPath.EndsWith("osz") && !oszPath.EndsWith("zip"))
                 return null;
 
-            var files = oszp.OsuFiles;
+            var oszp = new OszProcessor(oszPath);
+            if (oszp.OsuFiles.Length == 0) return null;
+            
             ReportProgress(0.3);
             return oszp;
         }
