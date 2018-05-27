@@ -25,7 +25,7 @@ namespace Osu2Saber.Model
         {
             var fname = Path.GetFileName(srcPath);
             var dstPath = Path.Combine(outputDir, fname);
-            File.Copy(srcPath, dstPath);
+            File.Copy(srcPath, dstPath, true);
             return fname;
         }
 
