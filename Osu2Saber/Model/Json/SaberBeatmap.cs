@@ -75,10 +75,10 @@ namespace Osu2Saber.Model.Json
         public double _time;
         public int _lineIndex;
         public int _type;
-        public float _duration;
+        public double _duration;
         public int _width;
         
-        public Obstacle(double time, Line line, ObstacleType type, float duration, int width)
+        public Obstacle(double time, Line line, ObstacleType type, double duration, int width)
         {
             _time = time; _lineIndex = (int)line; _type = (int)type; _duration = duration; _width = width;
         }
