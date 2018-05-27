@@ -142,28 +142,20 @@ namespace Osu2Saber.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
-            dropInfo.Effects = dragFileList.Any(item =>
-            {
-                var extension = Path.GetExtension(item);
-                return extension != null && extension.Equals(".zip");
-            }) ? DragDropEffects.Copy : DragDropEffects.None;
+            var files = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>();
+            dropInfo.Effects = files.Any(fname => fname.EndsWith(".zip"))
+                ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
         public void Drop(IDropInfo dropInfo)
         {
-            var dragFileList = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>()
+            var files = ((DataObject)dropInfo.Data).GetFileDropList().Cast<string>()
                 .Where(fname => fname.EndsWith(".zip") || fname.EndsWith(".osz"))
                 .ToList();
-            //dropInfo.Effects = dragFileList.Any(item =>
-            //{
-            //    var extension = Path.GetExtension(item);
-            //    return extension != null && extension.Equals(".zip");
-            //}) ? DragDropEffects.Copy : DragDropEffects.None;
 
-            if (dragFileList.Count == 0) return;
+            if (files.Count == 0) return;
 
-            foreach (var file in dragFileList)
+            foreach (var file in files)
             {
                 OszFiles.Add(file);
             }
