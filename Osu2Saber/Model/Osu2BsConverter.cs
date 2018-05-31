@@ -30,7 +30,7 @@ namespace Osu2Saber.Model
         }
         public static double MinimumDifficulty { set; get; } = 0;
         public static double MaximumDifficulty { set; get; } = 10;
-        public static bool PreferHarder { set; get; }
+        public static bool PreferHarder { set; get; } = true;
 
         const string InfoFileName = "info.json";
         const int MaxNumOfBeatmap = 5;
