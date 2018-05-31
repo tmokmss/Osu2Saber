@@ -79,7 +79,7 @@ namespace Osu2Saber.Model
             var beatmaps = OsuFiles
                 .Select((e, i) => LoadOsuFile(i))
                 .Where(map => map != null)
-                .Where(map => map.Mode == 0) // pick osu! maps only (not taiko, CtB, or mania)
+                .Where(map => map.Mode != 1) // exclude taiko map
                 .ToArray();
             return beatmaps;
         }
