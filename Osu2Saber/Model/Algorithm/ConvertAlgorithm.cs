@@ -11,11 +11,13 @@ namespace Osu2Saber.Model.Algorithm
         public static bool HandleHitSlider = false;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
-        
-        const int NegligibleTimeDiffMs = 500; // is used for the first note and event time gap
-        const int EnoughIntervalMs = 1500;  // is used to determine whether to reset cut direction
-        const int EnoughIntervalForSymMs = 800; // is used to determine to set a symmetric note
-        const float EnoughIntervalBetweenNotes = 0.25f;
+
+        int NegligibleTimeDiffMs = 500; // is used for the first note and event time gap
+        int EnoughIntervalMs = 1500;  // is used to determine whether to reset cut direction
+        int EnoughIntervalForSymMs = 800; // is used to determine to set a symmetric note
+        float EnoughInterval = 3.0f;  // is used to determine whether to reset cut direction
+        float EnoughIntervalForSym = 2.0f; // is used to determine to set a symmetric note
+        float EnoughIntervalBetweenNotes = 0.25f;
 
         protected Beatmap org;
         protected SaberBeatmap dst;
@@ -25,6 +27,7 @@ namespace Osu2Saber.Model.Algorithm
         protected List<Note> notes = new List<Note>();
         protected int bpm;
         protected int offset;
+        protected bool isMania = false;
 
         Random rnd4dir;
 
@@ -39,6 +42,10 @@ namespace Osu2Saber.Model.Algorithm
             bpm = dst._beatsPerMinute;
             offset = osu.TimingPoints[0].Offset;
             rnd4dir = new Random(offset);
+            isMania = org.Mode == 3;
+
+            EnoughIntervalMs = Math.Min(EnoughIntervalMs, ConvertBeat(EnoughInterval));
+            EnoughIntervalForSym = Math.Min(EnoughIntervalForSym, ConvertBeat(EnoughInterval));
         }
 
         // You may override this method for better map generation
@@ -48,9 +55,11 @@ namespace Osu2Saber.Model.Algorithm
             RemoveExcessNotes();
             SetCutDirection();
             AddSymmetryNotes();
+            //AddObstacles(); // currently disabled
             MakeLightEffect();
         }
 
+        #region Process for placing notes
         void MakeHitObjects()
         {
             foreach (var obj in org.HitObjects)
@@ -87,16 +96,80 @@ namespace Osu2Saber.Model.Algorithm
                 {
                     var temp = (HitSpinner)obj;
                     AddNote(temp.Time, temp.Position.x, temp.Position.y);
-                    
+
                     // this is just a nuisance at many times
                     // AddNote(temp.EndTime, temp.Position.x, temp.Position.y);
                 }
-                else
+                else  // is a HitCircle
                 {
                     AddNote(obj.Time, obj.Position.x, obj.Position.y);
                 }
 
             }
+        }
+
+        void AddNote(int timeMs, float posx, float posy)
+        {
+            var (line, layer) = DeterminePosition(posx, posy);
+            var note = new Note(ConvertTime(timeMs), line, layer, DetermineColor(line, layer), CutDirection.Any);
+            notes.Add(note);
+        }
+
+        (int line, int layer) DeterminePosition(double x, double y)
+        {
+            if (x < 0) x = 0;
+            else if (x > OsuScreenXMax) x = OsuScreenXMax;
+
+            if (y < 0) y = 0;
+            else if (y > OsuScreenYMax) y = OsuScreenYMax;
+
+            // just map notes position to BS screen
+            var line = (int)Math.Floor(x / (OsuScreenXMax + 1) * (double)Line.MaxNum);
+            var layer = (int)Math.Floor(y / (OsuScreenYMax + 1) * (double)Layer.MaxNum);
+            if (isMania) layer = DetermineLayerMania(line);
+
+            layer = SlideLayer(line, layer, y);
+            return (line: line, layer: layer);
+        }
+
+        int beforeLayerLeft = 0, beforeLayerRight = 0;
+        int DetermineLayerMania(int line)
+        {
+            var diff = (int)rnd4dir.Next(-1, 2);
+            if (DetermineColor(line, 0) == NoteType.Red)
+            {
+                beforeLayerLeft += diff;
+                beforeLayerLeft = beforeLayerLeft >= (int)Layer.MaxNum ? (int)Layer.Top : beforeLayerLeft;
+                beforeLayerLeft = beforeLayerLeft < (int)0 ? (int)Layer.Bottom : beforeLayerLeft;
+                return beforeLayerLeft;
+            }
+            else
+            {
+                beforeLayerRight += diff;
+                beforeLayerRight = beforeLayerRight >= (int)Layer.MaxNum ? (int)Layer.Top : beforeLayerRight;
+                beforeLayerRight = beforeLayerRight < (int)0 ? (int)Layer.Bottom : beforeLayerRight;
+                return beforeLayerRight;
+            }
+        }
+
+        int SlideLayer(int line, int layer, double y)
+        {
+            // don't want notes come to right front of our eyes so often
+            if (layer != (int)Layer.Middle) return layer;
+            if (line == (int)Line.Left || line == (int)Line.Right) return layer;
+
+            // The larger this value is, the less likely notes appear in center middle.
+            var fineSection = 8;
+            var layerIdx = (int)Math.Floor(y / (OsuScreenYMax + 1) * fineSection);
+            if (layerIdx == fineSection / 2) return layer;
+            if (layerIdx < fineSection / 2) return (int)Layer.Bottom;
+            return (int)Layer.Top;
+        }
+
+        NoteType DetermineColor(int line, int layer)
+        {
+            if (line < 2) return NoteType.Red;
+            return NoteType.Blue;
         }
 
         void RemoveExcessNotes()
@@ -117,29 +190,44 @@ namespace Osu2Saber.Model.Algorithm
             float lastX = 0, lastY = 0;
             double lastTime = -100;
             var newNotes = new List<Note>();
+            var rushCount = 0;
+            Note savedNote = null;
+
             foreach (var note in notes)
             {
                 var distance = Math.Sqrt(Math.Pow(lastX - note._lineIndex, 2) * 9.0 / 16 + Math.Pow(lastY - note._lineLayer, 2));
                 var timeGap = note._time - lastTime;
 
-                if (timeGap > EnoughIntervalBetweenNotes * (1 + 0.4 * distance))
+                if (timeGap > EnoughIntervalBetweenNotes * (1 + 0.2 * distance))
                 {
                     // the timeGap is long enough
+                    rushCount = 0;
+
                     newNotes.Add(note);
 
                     lastTime = note._time;
                     lastX = note._lineIndex;
                     lastY = note._lineLayer;
+
+                    // we want to add at most 3 sequence of notes with short gaps
+                    if (rushCount < 0 && savedNote != null)
+                    {
+                        newNotes.Add(savedNote);
+                        rushCount = 0;
+                        savedNote = null;
+                    }
+                }
+                else
+                {
+                    if (savedNote == null)
+                    {
+                        savedNote = note;
+                        rushCount = 0;
+                    }
+                    rushCount++;
                 }
             }
             return newNotes;
-        }
-
-        void AddNote(int timeMs, float posx, float posy)
-        {
-            var (line, layer) = DeterminePosition(posx, posy);
-            var note = new Note(ConvertTime(timeMs), line, layer, DetermineColor(line, layer), CutDirection.Any);
-            notes.Add(note);
         }
 
         double GetBeatDurationIn(int timeMs)
@@ -177,41 +265,199 @@ namespace Osu2Saber.Model.Algorithm
             return (int)Math.Round(timeBeat / bpm * 60 * 1000);
         }
 
-        (int line, int layer) DeterminePosition(float x, float y)
+        #endregion
+
+        #region Process for cut direction
+        void SetCutDirection()
         {
-            if (x < 0) x = 0;
-            else if (x > OsuScreenXMax) x = OsuScreenXMax;
+            var n = Notes.Count;
+            if (n == 0) return;
+            var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
+            var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
 
-            if (y < 0) y = 0;
-            else if (y > OsuScreenYMax) y = OsuScreenYMax;
-
-            // just map notes position to BS screen
-            var line = (int)Math.Floor(x / (OsuScreenXMax + 1) * (double)Line.MaxNum);
-            var layer = (int)Math.Floor(y / (OsuScreenYMax + 1) * (double)Layer.MaxNum);
-            layer = SlideLayer(line, layer, y);
-            return (line: line, layer: layer);
+            SetCutDirection(rightNotes);
+            SetCutDirection(leftNotes);
         }
 
-        int SlideLayer(int line, int layer, float y)
+        void SetCutDirection(List<Note> notes)
         {
-            // don't want notes come to right front of our eyes so often
-            if (layer != (int)Layer.Middle) return layer;
-            if (line == (int)Line.Left || line == (int)Line.Right) return layer;
+            var n = notes.Count;
+            if (n < 1) return;
 
-            // The larger this value is, the less likely notes appear in center middle.
-            var fineSection = 8;
-            var layerIdx = (int)Math.Floor(y / (OsuScreenYMax + 1) * fineSection);
-            if (layerIdx == fineSection / 2) return layer;
-            if (layerIdx < fineSection / 2) return (int)Layer.Bottom;
-            return (int)Layer.Top;
+            // the first cut direction can be determined independently
+            notes[0]._cutDirection = (int)PickBestDirectionSingle(notes[0]._lineIndex, notes[0]._lineLayer);
+
+            // the other notes should be determined depending on one before note.
+            for (var i = 1; i < n; i++)
+            {
+                SetCutDirection(notes[i - 1], notes[i]);
+            }
         }
 
-        NoteType DetermineColor(int line, int layer)
+        void SetCutDirection(Note before, Note now)
         {
-            if (line < 2) return NoteType.Red;
-            return NoteType.Blue;
+            var swingFac = Math.Pow(ConvertBeat(now._time - before._time) * 1.0 / EnoughIntervalMs, 1.0 / 2);
+            if (swingFac > 1)
+            {
+                now._cutDirection = (int)PickBestDirectionSingle(now._lineIndex, now._lineLayer);
+                //now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
+            }
+            else
+            {
+                now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
+            }
         }
 
+        // the best cut direction for each section below
+        //  8  9 10 11
+        //  4  5  6  7
+        //  0  1  2  3 
+        int[] bestDir = new int[] { 6, 1, 1, 7, 2, 8, 8, 3, 4, 0, 0, 5 };
+        CutDirection PickBestDirectionSingle(int line, int layer)
+        {
+            var idx = (int)Line.MaxNum * layer + line;
+            var best = (CutDirection)bestDir[idx];
+            if (best == CutDirection.Any) return PickRandomDirection();
+            return best;
+        }
+
+        CutDirection PickRandomDirection(DirectionRandomMode mode = DirectionRandomMode.Any)
+        {
+            int min = 0, max = (int)CutDirection.Any;
+            switch (mode)
+            {
+                case DirectionRandomMode.OnlyNormal:
+                    max = (int)CutDirection.Left + 1;
+                    break;
+                case DirectionRandomMode.OnlyDiagonal:
+                    min = (int)CutDirection.DownRight;
+                    break;
+            }
+            return (CutDirection)rnd4dir.Next(min, max);
+        }
+
+        // positon difference in each axis after the specified direction of cut
+        static float Sqr2 = (float)Math.Sqrt(2) / 2;
+        float[] lineDiff = new float[] { 0, 0, -1, 1, -Sqr2, Sqr2, -Sqr2, Sqr2 };
+        float[] layerDiff = new float[] { 1, -1, 0, 0, Sqr2, Sqr2, -Sqr2, -Sqr2 };
+
+        CutDirection PickBestDirectionCont(Note now, Note before, double swingAmount)
+        {
+            var lastcut = before._cutDirection;
+            if (lastcut == (int)CutDirection.Any)
+                lastcut = (int)PickRandomDirection();
+
+            // limit factor
+            swingAmount = Math.Max(swingAmount, 2.5);
+
+            // this is where player's hand supposed to be
+            var nowline = before._lineIndex + lineDiff[lastcut] * swingAmount;
+            var nowlayer = before._lineLayer + layerDiff[lastcut] * swingAmount;
+
+            var linegap = now._lineIndex - nowline;
+            var layergap = now._lineLayer - nowlayer;
+            var deg = Math.Atan2(layergap, linegap * 3.0 / 4) * 180 / Math.PI;
+            return PickDirectionFromDeg(deg);
+        }
+
+        CutDirection PickDirectionFromDeg(double deg)
+        {
+            // divide a circle into 8 sections
+            const double Div = 45;
+            if (deg >= 180 - Div / 2) return CutDirection.Left;
+            if (deg >= 180 - Div * 3 / 2) return CutDirection.UpLeft;
+            if (deg >= 180 - Div * 5 / 2) return CutDirection.Up;
+            if (deg >= 180 - Div * 7 / 2) return CutDirection.UpRight;
+            if (deg >= 180 - Div * 9 / 2) return CutDirection.Right;
+            if (deg >= 180 - Div * 11 / 2) return CutDirection.DownRight;
+            if (deg >= 180 - Div * 13 / 2) return CutDirection.Down;
+            if (deg >= 180 - Div * 15 / 2) return CutDirection.DownLeft;
+            return CutDirection.Left;
+        }
+        #endregion
+
+        #region Process for adding symmetry notes
+        void AddSymmetryNotes()
+        {
+            var n = Notes.Count;
+            if (n < 2) return;
+
+            var addingNotes = new List<Note>();
+            SymmetryMode symmode = SymmetryMode.Line;
+
+            AddSymmetryNote(null, Notes[0], Notes[1], addingNotes, symmode);
+            for (var i = 1; i < Notes.Count - 1; i++)
+            {
+                var now = Notes[i];
+                AddSymmetryNote(Notes[i - 1], now, Notes[i + 1], addingNotes, symmode);
+            }
+            AddSymmetryNote(Notes[n - 2], Notes[n - 1], null, addingNotes, symmode);
+
+            foreach (var note in addingNotes)
+            {
+                notes.Add(note);
+            }
+            notes = Notes.OrderBy(note => note._time).ToList();
+        }
+
+        void AddSymmetryNote(Note before, Note now, Note after, List<Note> addition, SymmetryMode symmode)
+        {
+            double lastInterval = 0, nextInterval = 0;
+            if (before == null)
+                lastInterval = EnoughIntervalForSymMs * 2;
+            else
+                lastInterval = ConvertBeat(now._time - before._time);
+
+            if (after == null)
+                nextInterval = EnoughIntervalForSymMs * 2;
+            else
+                nextInterval = ConvertBeat(after._time - now._time);
+
+            if (nextInterval > EnoughIntervalForSymMs && lastInterval > EnoughIntervalForSymMs)
+            {
+                var note = GetMirrorNote(now, symmode);
+                addition.Add(note);
+            }
+        }
+
+        Note GetMirrorNote(Note note, SymmetryMode mode)
+        {
+            int line = 0, layer = 0;
+            switch (mode)
+            {
+                case SymmetryMode.Line:
+                    line = (int)(-note._lineIndex + (int)Line.Right);
+                    layer = note._lineLayer;
+                    break;
+                default:
+                    line = (int)(-note._lineIndex + (int)Line.Right);
+                    layer = (int)(-note._lineLayer + (int)Layer.Top);
+                    break;
+            }
+            var dir = PickOppositeDirection(note._cutDirection, mode);
+            var type = note._type == (int)NoteType.Blue ? NoteType.Red : NoteType.Blue;
+            return new Note(note._time, line, layer, type, dir);
+        }
+
+        // the cut direction for symmetrically placed note
+        int[] lineSym = new int[] { 0, 1, 3, 2, 5, 4, 7, 6 };
+        int[] pointSym = new int[] { 1, 0, 3, 2, 7, 6, 5, 4 };
+        CutDirection PickOppositeDirection(int dir, SymmetryMode mode)
+        {
+            if (dir < 0 || dir >= (int)CutDirection.Any)
+                return CutDirection.Any;
+
+            switch (mode)
+            {
+                case SymmetryMode.Line:
+                    return (CutDirection)lineSym[dir];
+                default:
+                    return (CutDirection)pointSym[dir];
+            }
+        }
+        #endregion
+
+        #region Process for light event
         void MakeLightEffect()
         {
             var lastVolume = org.TimingPoints[0].Volume;
@@ -320,192 +566,69 @@ namespace Osu2Saber.Model.Algorithm
             else
                 return color + 4;
         }
+        #endregion
 
-        void SetCutDirection()
+        #region Process for obstacles
+        private void AddObstacles()
         {
-            var n = Notes.Count;
-            if (n == 0) return;
-            var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
-            var leftNotes = Notes.Where(note => note._type == (int)(NoteType.Red)).ToList();
-
-            SetCutDirection(rightNotes);
-            SetCutDirection(leftNotes);
-        }
-
-        void SetCutDirection(List<Note> notes)
-        {
-            var n = notes.Count;
-            if (n < 1) return;
-
-            // the first cut direction can be determined independently
-            notes[0]._cutDirection = (int)PickBestDirectionSingle(notes[0]._lineIndex, notes[0]._lineLayer);
-
-            // the other notes should be determined depending on one before note.
-            for (var i = 1; i < n; i++)
+            double lastBottomBeat = 0, latestBottomBeat = 0;
+            double lastUpperBeat = 0, latestUpperBeat = 0;
+            double beforeLatestBottomBeat = 0;
+            bool isDuringBottom = false;
+            //for (var i = 0; i < notes.Count; i++)
+            foreach (var note in notes)
             {
-                SetCutDirection(notes[i - 1], notes[i]);
+                if (isDuringBottom)
+                {
+                    if (IsOnUpper(note))
+                    {
+                        isDuringBottom = false;
+                        latestUpperBeat = note._time;
+                    }
+                    else
+                    {
+                        beforeLatestBottomBeat = latestBottomBeat;
+                        latestBottomBeat = note._time;
+                    }
+                }
+                else
+                {
+                    if (IsOnUpper(note))
+                    {
+                        lastUpperBeat = note._time;
+                    }
+                    else
+                    {
+                        isDuringBottom = true;
+                        lastBottomBeat = note._time;
+                    }
+                }
+
+                if (isDuringBottom) continue;
+                if (latestUpperBeat < latestBottomBeat) continue;
+                if (lastUpperBeat > lastBottomBeat) continue;
+
+                var timeDiff = latestBottomBeat - lastBottomBeat;
+                if (timeDiff > 3 && timeDiff < 8)
+                {
+                    AddCeiling((lastBottomBeat + lastUpperBeat) / 2, (latestBottomBeat * 0.1 + beforeLatestBottomBeat * 1.9) / 2);
+                }
+                latestBottomBeat = 0;
             }
         }
 
-        void SetCutDirection(Note before, Note now)
+        private bool IsOnUpper(Note note)
         {
-            var swingFac = Math.Pow(ConvertBeat(now._time - before._time) * 1.0 / EnoughIntervalMs, 1.0 / 2);
-            if (swingFac > 1)
-            {
-                now._cutDirection = (int)PickBestDirectionSingle(now._lineIndex, now._lineLayer);
-                //now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
-            }
-            else
-            {
-                now._cutDirection = (int)PickBestDirectionCont(now, before, swingFac);
-            }
+            if (note._lineLayer > 0) return true;
+            return false;
         }
 
-        // the best cut direction for each section below
-        //  8  9 10 11
-        //  4  5  6  7
-        //  0  1  2  3 
-        int[] bestDir = new int[] { 6, 1, 1, 7, 2, 8, 8, 3, 4, 0, 0, 5 };
-        CutDirection PickBestDirectionSingle(int line, int layer)
+        private void AddCeiling(double beginBeat, double endBeat)
         {
-            var idx = (int)Line.MaxNum * layer + line;
-            var best = (CutDirection)bestDir[idx];
-            if (best == CutDirection.Any) return PickRandomDirection();
-            return best;
+            var obs = new Obstacle(beginBeat, Line.Left, ObstacleType.Ceiling, endBeat - beginBeat, (int)Line.MaxNum);
+            Obstacles.Add(obs);
         }
-
-        CutDirection PickRandomDirection(DirectionRandomMode mode = DirectionRandomMode.Any)
-        {
-            int min = 0, max = (int)CutDirection.Any;
-            switch (mode)
-            {
-                case DirectionRandomMode.OnlyNormal:
-                    max = (int)CutDirection.Left + 1;
-                    break;
-                case DirectionRandomMode.OnlyDiagonal:
-                    min = (int)CutDirection.DownRight;
-                    break;
-            }
-            return (CutDirection)rnd4dir.Next(min, max);
-        }
-
-        // positon difference in each axis after the specified direction of cut
-        static float Sqr2 = (float)Math.Sqrt(2) / 2;
-        float[] lineDiff = new float[] { 0, 0, -1, 1, -Sqr2, Sqr2, -Sqr2, Sqr2 };
-        float[] layerDiff = new float[] { 1, -1, 0, 0, Sqr2, Sqr2, -Sqr2, -Sqr2 };
-
-        CutDirection PickBestDirectionCont(Note now, Note before, double swingAmount)
-        {
-            var lastcut = before._cutDirection;
-            if (lastcut == (int)CutDirection.Any)
-                lastcut = (int)PickRandomDirection();
-
-            // limit factor
-            swingAmount = Math.Max(swingAmount, 2.5);
-
-            // this is where player's hand supposed to be
-            var nowline = before._lineIndex + lineDiff[lastcut] * swingAmount;
-            var nowlayer = before._lineLayer + layerDiff[lastcut] * swingAmount;
-
-            var linegap = now._lineIndex - nowline;
-            var layergap = now._lineLayer - nowlayer;
-            var deg = Math.Atan2(layergap, linegap * 3.0 / 4) * 180 / Math.PI;
-            return PickDirectionFromDeg(deg);
-        }
-
-        CutDirection PickDirectionFromDeg(double deg)
-        {
-            // divide a circle into 8 sections
-            const double Div = 45;
-            if (deg >= 180 - Div / 2) return CutDirection.Left;
-            if (deg >= 180 - Div * 3 / 2) return CutDirection.UpLeft;
-            if (deg >= 180 - Div * 5 / 2) return CutDirection.Up;
-            if (deg >= 180 - Div * 7 / 2) return CutDirection.UpRight;
-            if (deg >= 180 - Div * 9 / 2) return CutDirection.Right;
-            if (deg >= 180 - Div * 11 / 2) return CutDirection.DownRight;
-            if (deg >= 180 - Div * 13 / 2) return CutDirection.Down;
-            if (deg >= 180 - Div * 15 / 2) return CutDirection.DownLeft;
-            return CutDirection.Left;
-        }
-
-        void AddSymmetryNotes()
-        {
-            var n = Notes.Count;
-            if (n < 2) return;
-
-            var addingNotes = new List<Note>();
-            SymmetryMode symmode = SymmetryMode.Line;
-
-            AddSymmetryNote(null, Notes[0], Notes[1], addingNotes, symmode);
-            for (var i = 1; i < Notes.Count - 1; i++)
-            {
-                var now = Notes[i];
-                AddSymmetryNote(Notes[i - 1], now, Notes[i + 1], addingNotes, symmode);
-            }
-            AddSymmetryNote(Notes[n - 2], Notes[n - 1], null, addingNotes, symmode);
-
-            foreach (var note in addingNotes)
-            {
-                notes.Add(note);
-            }
-            notes = Notes.OrderBy(note => note._time).ToList();
-        }
-
-        void AddSymmetryNote(Note before, Note now, Note after, List<Note> addition, SymmetryMode symmode)
-        {
-            double lastInterval = 0, nextInterval = 0;
-            if (before == null)
-                lastInterval = EnoughIntervalForSymMs * 2;
-            else
-                lastInterval = ConvertBeat(now._time - before._time);
-
-            if (after == null)
-                nextInterval = EnoughIntervalForSymMs * 2;
-            else
-                nextInterval = ConvertBeat(after._time - now._time);
-
-            if (nextInterval > EnoughIntervalForSymMs && lastInterval > EnoughIntervalForSymMs)
-            {
-                var note = GetMirrorNote(now, symmode);
-                addition.Add(note);
-            }
-        }
-
-        Note GetMirrorNote(Note note, SymmetryMode mode)
-        {
-            int line = 0, layer = 0;
-            switch (mode)
-            {
-                case SymmetryMode.Line:
-                    line = (int)(-note._lineIndex + (int)Line.Right);
-                    layer = note._lineLayer;
-                    break;
-                default:
-                    line = (int)(-note._lineIndex + (int)Line.Right);
-                    layer = (int)(-note._lineLayer + (int)Layer.Top);
-                    break;
-            }
-            var dir = PickOppositeDirection(note._cutDirection, mode);
-            var type = note._type == (int)NoteType.Blue ? NoteType.Red : NoteType.Blue;
-            return new Note(note._time, line, layer, type, dir);
-        }
-
-        // the cut direction for symmetrically placed note
-        int[] lineSym = new int[] { 0, 1, 3, 2, 5, 4, 7, 6 };
-        int[] pointSym = new int[] { 1, 0, 3, 2, 7, 6, 5, 4 };
-        CutDirection PickOppositeDirection(int dir, SymmetryMode mode)
-        {
-            if (dir < 0 || dir >= (int)CutDirection.Any)
-                return CutDirection.Any;
-
-            switch (mode)
-            {
-                case SymmetryMode.Line:
-                    return (CutDirection)lineSym[dir];
-                default:
-                    return (CutDirection)pointSym[dir];
-            }
-        }
+        #endregion
     }
 
     enum DirectionRandomMode
