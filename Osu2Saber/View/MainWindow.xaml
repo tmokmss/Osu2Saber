@@ -8,7 +8,7 @@
         xmlns:ViewModel="clr-namespace:Osu2Saber.ViewModel"
         xmlns:View="clr-namespace:Osu2Saber.View" x:Class="Osu2Saber.MainWindow"
         mc:Ignorable="d"
-        Title="Osu2Saber" Height="450" Width="800" MinWidth="500" MinHeight="300">
+        Title="Osu2Saber" Height="450" Width="800" MinWidth="500" MinHeight="300" Icon="/Osu2Saber;component/Resources/icon.ico">
     <Window.DataContext>
         <ViewModel:MainWindowViewModel/>
     </Window.DataContext>
