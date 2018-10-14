@@ -22,6 +22,7 @@
         <Label Content="Max." HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
         <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
         <CheckBox IsChecked="{Binding HandleHitSlider}" Content="Don't ignore Hit Slider" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top" ToolTip="By default, hit sliders are ignored because they make a map too difficult. However, some maps get better with them. Just try it!"/>
+        <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No cut-direction &amp; scattared-placement" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattared placement"/>
 
     </Grid>
 </UserControl>

@@ -42,5 +42,11 @@ namespace Osu2Saber.ViewModel
             set { ConvertAlgorithm.HandleHitSlider = value; }
             get => ConvertAlgorithm.HandleHitSlider;
         }
+
+        public bool NoDirectionAndPlacement
+        {
+            set { ConvertAlgorithm.NoDirectionAndPlacement = value; }
+            get => ConvertAlgorithm.NoDirectionAndPlacement;
+        }
     }
 }

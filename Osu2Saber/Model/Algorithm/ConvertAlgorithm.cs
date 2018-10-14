@@ -9,6 +9,7 @@ namespace Osu2Saber.Model.Algorithm
     class ConvertAlgorithm
     {
         public static bool HandleHitSlider = false;
+        public static bool NoDirectionAndPlacement = false;
 
         protected const float OsuScreenXMax = 512, OsuScreenYMax = 384;
 
@@ -126,10 +127,19 @@ namespace Osu2Saber.Model.Algorithm
             // just map notes position to BS screen
             var line = (int)Math.Floor(x / (OsuScreenXMax + 1) * (double)Line.MaxNum);
             var layer = (int)Math.Floor(y / (OsuScreenYMax + 1) * (double)Layer.MaxNum);
+
+            if (NoDirectionAndPlacement)
+            {
+                if (!isMania) return (0, 0);
+                layer = DetermineLayerMania(line);
+                return (line, layer);
+            }
+
             if (isMania) layer = DetermineLayerMania(line);
 
             layer = SlideLayer(line, layer, y);
-            return (line: line, layer: layer);
+
+            return (line, layer);
         }
 
         int beforeLayerLeft = 0, beforeLayerRight = 0;
@@ -270,6 +280,7 @@ namespace Osu2Saber.Model.Algorithm
         #region Process for cut direction
         void SetCutDirection()
         {
+            if (NoDirectionAndPlacement) return;
             var n = Notes.Count;
             if (n == 0) return;
             var rightNotes = Notes.Where(note => note._type == (int)(NoteType.Blue)).ToList();
