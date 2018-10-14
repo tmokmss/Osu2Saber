@@ -124,6 +124,7 @@
     </Compile>
     <Compile Include="Model\Algorithm\ConvertAlgorithm.cs" />
     <Compile Include="Model\BatchProcessor.cs" />
+    <Compile Include="Model\Logger.cs" />
     <Compile Include="Model\Mp3toOggConverter.cs" />
     <Compile Include="Model\Osu2BsConverter.cs" />
     <Compile Include="Model\OszProcessor.cs" />

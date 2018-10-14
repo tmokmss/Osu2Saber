@@ -1,8 +1,7 @@
 ﻿using Prism.Mvvm;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Osu2Saber.Model
@@ -11,6 +10,7 @@ namespace Osu2Saber.Model
     {
         object progressLock = new object();
         double progress;
+        Logger logger;
 
         public string[] TargetFiles { private set; get; }
         public string WorkDir { private set; get; }
@@ -30,39 +30,41 @@ namespace Osu2Saber.Model
         {
             TargetFiles = targetFiles;
             WorkDir = workDir;
+            logger = new Logger();
         }
 
         public Task BatchProcess()
         {
-            var tasks = new List<Task>();
-            for (var i = 0; i < TargetFiles.Length; i++)
-            {
-                var x = i;
-                var task = Task.Run(() => Process(x));
-                tasks.Add(task);
-            }
+            var tasks = TargetFiles.Select(file => Task.Run(() => Process(file)));
             return Task.WhenAll(tasks);
         }
 
-        void Process(int index)
+        void Process(string oszPath)
         {
-            var oszp = DecompressOsz(index);
-            if (oszp == null) return;
+            try
+            {
+                var oszp = DecompressOsz(oszPath);
+                if (oszp == null) return;
 
-            var o2b = ConvertBeatmap(oszp);
-            ConvertImgAudio(o2b);
+                var o2b = ConvertBeatmap(oszp);
+                ConvertImgAudio(o2b);
+            }
+            catch (Exception e)
+            {
+                logger.AddException(e, oszPath);
+                logger.Write();
+            }
         }
 
-        OszProcessor DecompressOsz(int index)
+        OszProcessor DecompressOsz(string oszPath)
         {
             OszProcessor.WorkDir = WorkDir;
-            var oszPath = TargetFiles[index];
             if (!oszPath.EndsWith("osz") && !oszPath.EndsWith("zip"))
                 return null;
 
             var oszp = new OszProcessor(oszPath);
             if (oszp.OsuFiles.Length == 0) return null;
-            
+
             ReportProgress(0.3);
             return oszp;
         }
@@ -95,7 +97,7 @@ namespace Osu2Saber.Model
 
         void ReportProgress(double add)
         {
-            lock(progressLock)
+            lock (progressLock)
             {
                 Progress += add;
             }
