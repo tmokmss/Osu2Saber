@@ -9,9 +9,9 @@
         public int Meter { get; set; }
         public int SampleType { get; set; }
         public int SampleSet { get; set; }
-        public int Volume { get; set; }
-        public bool Inherited { get; set; }
-        public bool KiaiMode { get; set; }
+        public int Volume { get; set; } = 100;
+        public bool Inherited { get; set; } = false;
+        public bool KiaiMode { get; set; } = false;
         #endregion
 
         #region constructors

@@ -238,8 +238,7 @@ namespace osuBMParser
 
             string[] tokens = data.Split(',');
 
-            // older format sometimes don't have kiai field
-            if (tokens.Length < 7)
+            if (tokens.Length < 5)
             {
                 Debug.WriteLine("osuBMParser: Invalid TimingPoint line, no further information available");
                 return;
@@ -252,15 +251,17 @@ namespace osuBMParser
             if (tokens[2] != null) timingPoint.Meter = toInt(tokens[2]);
             if (tokens[3] != null) timingPoint.SampleType = toInt(tokens[3]);
             if (tokens[4] != null) timingPoint.SampleSet = toInt(tokens[4]);
-            if (tokens[5] != null) timingPoint.Volume = toInt(tokens[5]);
-            if (tokens[6] != null) timingPoint.Inherited = toBool(tokens[6]);
+
+            if (tokens.Length > 5)
+                if (tokens[5] != null) timingPoint.Volume = toInt(tokens[5]);
+
+            if (tokens.Length > 6)
+                if (tokens[6] != null) timingPoint.Inherited = toBool(tokens[6]);
 
             if (tokens.Length > 7)
                 if (tokens[7] != null) timingPoint.KiaiMode = toBool(tokens[7]);
-                else timingPoint.KiaiMode = false;
 
             beatmap.TimingPoints.Add(timingPoint);
-
         }
 
         private void colourParse(string data)
