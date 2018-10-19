@@ -58,15 +58,15 @@ namespace Osu2Saber.Model
             OsuFiles = filesInFull.Select(path => Path.GetFileName(path)).ToArray();
         }
 
-        public Beatmap LoadOsuFile(int index)
+        Beatmap LoadOsuFile(string oszName)
         {
-            if (index < 0 || index >= OsuFiles.Length) return null;
-            var filePath = Path.Combine(OutDir, OsuFiles[index]);
+            var filePath = Path.Combine(OutDir, oszName);
             Beatmap bm = null;
             try
             {
                 bm = new Beatmap(filePath);
-            } catch(FormatException e)
+            }
+            catch (FormatException e)
             {
                 Console.WriteLine(e);
                 Console.WriteLine("Error while parsing " + filePath);
@@ -74,15 +74,13 @@ namespace Osu2Saber.Model
             return bm;
         }
 
-        public Beatmap[] LoadOsuFiles()
+        public IEnumerable<Beatmap> LoadOsuFiles()
         {
             var beatmaps = OsuFiles
-                .Select((e, i) => LoadOsuFile(i))
+                .Select(file => LoadOsuFile(file))
                 .Where(map => map != null)
-                .Where(map => map.Mode != 1) // exclude taiko map
-                .ToArray();
+                .Where(map => map.Mode != 1); // exclude taiko map
             return beatmaps;
         }
-
     }
 }
