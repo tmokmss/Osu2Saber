@@ -193,6 +193,14 @@ namespace osuBMParser
                             string[] intTokens = tokens[1].Split('.');
                             property.SetValue(beatmap, Convert.ChangeType(intTokens[0].Trim(), property.PropertyType));
                         }
+                        else if (property.PropertyType == typeof(float))
+                        {
+                            property.SetValue(beatmap, float.Parse(tokens[1].Trim(), CultureInfo.InvariantCulture));
+                        }
+                        else if (property.PropertyType == typeof(double))
+                        {
+                            property.SetValue(beatmap, double.Parse(tokens[1].Trim(), CultureInfo.InvariantCulture));
+                        }
                         else
                         {
                             property.SetValue(beatmap, Convert.ChangeType(tokens[1].Trim(), property.PropertyType));
