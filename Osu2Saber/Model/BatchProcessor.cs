@@ -8,6 +8,10 @@ namespace Osu2Saber.Model
 {
     class BatchProcessor : BindableBase
     {
+        public static bool IncludeTaiko { set; get; } = false;
+        public static bool IncludeCtB { set; get; } = true;
+        public static bool IncludeMania { set; get; } = true;
+
         object progressLock = new object();
         double progress;
         Logger logger;
@@ -75,10 +79,11 @@ namespace Osu2Saber.Model
             OutputDir = Osu2BsConverter.WorkDir;
             var o2b = new Osu2BsConverter(oszp.OutDir, oszp.OszName);
 
-            foreach (var osufile in oszp.LoadOsuFiles())
-            {
-                o2b.AddBeatmap(osufile);
-            }
+            oszp.LoadOsuFiles()
+                .Where(osuFile => IncludeTaiko || osuFile.Mode != 1)
+                .Where(osuFile => IncludeCtB || osuFile.Mode != 2)
+                .Where(osuFile => IncludeMania || osuFile.Mode != 3)
+                .ToList().ForEach(osufile => o2b.AddBeatmap(osufile));
 
             o2b.ProcessAll();
 

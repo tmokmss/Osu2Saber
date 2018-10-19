@@ -30,7 +30,7 @@ namespace Osu2Saber.ViewModel
             }
             get => Osu2BsConverter.MinimumDifficulty;
         }
-        
+
         public bool PreferHarder
         {
             set { Osu2BsConverter.PreferHarder = value; }
@@ -47,6 +47,24 @@ namespace Osu2Saber.ViewModel
         {
             set { ConvertAlgorithm.NoDirectionAndPlacement = value; }
             get => ConvertAlgorithm.NoDirectionAndPlacement;
+        }
+
+        public bool IncludeTaiko
+        {
+            set { BatchProcessor.IncludeTaiko = value; }
+            get => BatchProcessor.IncludeTaiko;
+        }
+
+        public bool IncludeCtB
+        {
+            set { BatchProcessor.IncludeCtB = value; }
+            get => BatchProcessor.IncludeCtB;
+        }
+
+        public bool IncludeMania
+        {
+            set { BatchProcessor.IncludeMania = value; }
+            get => BatchProcessor.IncludeMania;
         }
     }
 }

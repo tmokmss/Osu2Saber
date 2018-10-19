@@ -78,8 +78,7 @@ namespace Osu2Saber.Model
         {
             var beatmaps = OsuFiles
                 .Select(file => LoadOsuFile(file))
-                .Where(map => map != null)
-                .Where(map => map.Mode != 1); // exclude taiko map
+                .Where(map => map != null);
             return beatmaps;
         }
     }

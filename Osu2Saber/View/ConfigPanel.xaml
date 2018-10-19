@@ -23,6 +23,10 @@
         <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
         <CheckBox IsChecked="{Binding HandleHitSlider}" Content="Don't ignore Hit Slider" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top" ToolTip="By default, hit sliders are ignored because they make a map too difficult. However, some maps get better with them. Just try it!"/>
         <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No cut-direction &amp; scattared-placement" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattared placement"/>
+        <Label Content="Includes:" HorizontalAlignment="Left" Margin="10,184,0,0" VerticalAlignment="Top" Width="102" Height="27"/>
+        <CheckBox IsChecked="{Binding IncludeTaiko}" Content="Taiko" HorizontalAlignment="Left" Margin="70,190,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding IncludeCtB}" Content="CtB" HorizontalAlignment="Left" Margin="128,190,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding IncludeMania}" Content="mania" HorizontalAlignment="Left" Margin="178,190,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </UserControl>
