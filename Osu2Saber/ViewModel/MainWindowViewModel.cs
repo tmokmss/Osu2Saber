@@ -18,9 +18,8 @@ namespace Osu2Saber.ViewModel
         string statusText = "Select an osz file first.";
         string workDir = "";
         bool canProcess = false;
-        bool isWorkDirSpecified = false;
-
-        BatchProcessor bp;
+		bool isWorkDirSpecified = false;
+		BatchProcessor bp;
 
         public string StatusText
         {
@@ -30,19 +29,24 @@ namespace Osu2Saber.ViewModel
                 RaisePropertyChanged();
             }
             get => statusText;
-        }
+		}
 
-        public string WorkDir
-        {
-            private set
-            {
-                workDir = value;
-                RaisePropertyChanged();
-            }
-            get => workDir;
-        }
+		public string WorkDir
+		{
+			private set
+			{
+				workDir = value;
+				RaisePropertyChanged();
+			}
+			get => workDir;
+		}
 
-        public bool CanProcess
+		public string WindowTitle
+		{
+			get => Osu2BsConverter.WindowName;
+		}
+
+		public bool CanProcess
         {
             private set
             {
@@ -50,9 +54,19 @@ namespace Osu2Saber.ViewModel
                 RaisePropertyChanged();
             }
             get => canProcess;
-        }
+		}
 
-        public ObservableCollection<string> OsuFiles { get; } = new ObservableCollection<string>();
+		public bool IsPanelActive
+		{
+			set
+			{
+				ConfigPanelViewModel.instance.IsPanelActive = value;
+				RaisePropertyChanged();
+			}
+			get => ConfigPanelViewModel.instance.IsPanelActive;
+		}
+
+		public ObservableCollection<string> OsuFiles { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> OszFiles { get; } = new ObservableCollection<string>();
         public int Progress { get => CalcProgress(); }
 
@@ -62,7 +76,7 @@ namespace Osu2Saber.ViewModel
         public DelegateCommand ClearCommand => new DelegateCommand(ClearList);
         public DelegateCommand SelectWorkFolderCommand => new DelegateCommand(SelectWorkFolder);
 
-        private void SelectWorkFolder()
+		private void SelectWorkFolder()
         {
             var fbd = new System.Windows.Forms.FolderBrowserDialog
             {
@@ -110,18 +124,22 @@ namespace Osu2Saber.ViewModel
             return progress;
         }
 
-        async void ProcessBatch()
+		async void ProcessBatch()
         {
             CanProcess = false;
-            StatusText = "Started processing.";
+			IsPanelActive = false;
+			//IsPanelActive = false;
+			//ConfigPanelViewModel.IsPanelActive = false;
+			StatusText = "Started processing.";
             bp = new BatchProcessor(OszFiles.ToArray(), WorkDir);
             bp.PropertyChanged += ModelChanged;
             await bp.BatchProcess();
             bp.PropertyChanged -= ModelChanged;
             StatusText = "Batch process completed.";
-            OpenOutputDir();
+            if (!BatchProcessor.DontOpenDirectory) OpenOutputDir();
             CanProcess = true;
-        }
+			IsPanelActive = true;
+		}
 
         void OpenOutputDir()
         {

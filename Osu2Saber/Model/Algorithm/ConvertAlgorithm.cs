@@ -40,7 +40,7 @@ namespace Osu2Saber.Model.Algorithm
         {
             org = osu;
             dst = bs;
-            bpm = dst._beatsPerMinute;
+            bpm = dst.getBPM();
             offset = osu.TimingPoints[0].Offset;
             rnd4dir = new Random(offset);
             isMania = org.Mode == 3;

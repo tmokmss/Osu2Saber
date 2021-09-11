@@ -8,14 +8,14 @@
         xmlns:ViewModel="clr-namespace:Osu2Saber.ViewModel"
         xmlns:View="clr-namespace:Osu2Saber.View" x:Class="Osu2Saber.MainWindow"
         mc:Ignorable="d"
-        Title="Osu2Saber" Height="450" Width="800" MinWidth="500" MinHeight="300" Icon="/Osu2Saber;component/Resources/icon.ico">
+        Title="{Binding WindowTitle}" Height="450" Width="800" MinWidth="500" MinHeight="450" Icon="/Osu2Saber;component/Resources/icon.ico">
     <Window.DataContext>
         <ViewModel:MainWindowViewModel/>
     </Window.DataContext>
     <Grid>
         <Button Content="Open Files" Command ="{Binding SelectFileCommand}" HorizontalAlignment="Right" Margin="0,10,199,0" VerticalAlignment="Top" Width="75"/>
         <Button Content="Process" Command="{Binding ProcessCommand}" IsEnabled="{Binding CanProcess}" HorizontalAlignment="Right" Margin="0,51,199,0" VerticalAlignment="Top" Width="75" />
-        <Button Content="Clear" Command="{Binding ClearCommand}" HorizontalAlignment="Right" Margin="0,0,199,60" VerticalAlignment="Bottom" Width="75"/>
+        <Button Content="Clear" Command="{Binding ClearCommand}" HorizontalAlignment="Right" Margin="0,0,199,60" VerticalAlignment="Bottom" Width="75" IsEnabled="{Binding IsPanelActive}" />
         <Button Content="Work dir" Command="{Binding SelectWorkFolderCommand}" HorizontalAlignment="Left" Margin="10,0,0,31" VerticalAlignment="Bottom" Width="62" Height="23"/>
         <StatusBar Height="22" VerticalAlignment="Bottom">
             <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}"/>
@@ -24,6 +24,15 @@
         <ProgressBar Value="{Binding Progress, Mode=OneWay}" HorizontalAlignment="Right" Height="23" Margin="0,0,10,31" VerticalAlignment="Bottom" Width="264"/>
         <TextBox Text="{Binding WorkDir, Mode=OneWay}" Height="23" Margin="77,0,289,31" TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True"/>
         <View:ConfigPanel HorizontalAlignment="Right" Height="Auto" Margin="0,81,10,86" Width="264"/>
+        <TextBlock Margin="0,10,10,386" HorizontalAlignment="Right">
+            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/Ivan-Alone/Osu2Saber" TextDecorations="None">Osu2Saber Project</Hyperlink>
+        </TextBlock>
+        <TextBlock Margin="0,30,10,366" HorizontalAlignment="Right">
+            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/tmokmss/" TextDecorations="None">tmokmss</Hyperlink> on GitHub
+        </TextBlock>
+        <TextBlock Margin="0,50,10,346" HorizontalAlignment="Right">
+            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/Ivan-Alone/" TextDecorations="None">Ivan_Alone</Hyperlink> on GitHub
+        </TextBlock>
 
     </Grid>
 </Window>

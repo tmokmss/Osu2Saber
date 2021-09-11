@@ -2,18 +2,47 @@
 using OggVorbisEncoder;
 using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace Osu2Saber.Model
 {
-    class Mp3toOggConverter
-    {
-        public static string ConvertToOgg(string srcPath, string outputDir)
-        {
-            var ext = Path.GetExtension(srcPath);
+	class Mp3toOggConverter
+	{
+		private static bool run(string prog, string args = "")
+		{
+			Process proc = new Process();
+			try {
+				proc.StartInfo.FileName = prog;
+				proc.StartInfo.Arguments = args;
+
+				#if DEBUG
+				#else
+					proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+					proc.StartInfo.CreateNoWindow = true;
+				#endif
+
+				proc.Start();
+				proc.WaitForExit();
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		}
+		public static string ConvertToOgg(string srcPath, string outputDir)
+		{
+			var ext = Path.GetExtension(srcPath);
             switch (ext)
             {
                 case ".mp3":
-                    return ConvertMp3toOgg(srcPath, outputDir);
+					// Tested, some mp3 files is broken after encoding (f.e. beatmap 1287 Hatsune Miku - Ievan Polkka; song is faster x2? after encoding)
+					// I do not want to search reason for it - just added this fix, native correct transcoding via FFmpeg
+					var oggName = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(srcPath) + ".ogg");
+					// Trying to run FFmpeg encoding 
+					if (run("ffmpeg", "-i \"" + srcPath + "\" -y -vn -c:a libvorbis \"" + oggName + "\"") && File.Exists(oggName) && new System.IO.FileInfo(oggName).Length > 0)
+					{
+						return oggName;
+					}
+					return ConvertMp3toOgg(srcPath, outputDir);
                 default:
                     // we give up to convert any other format for now
                     // wav and ogg are just ok for BS though

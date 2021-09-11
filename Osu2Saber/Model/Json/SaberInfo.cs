@@ -13,49 +13,83 @@ namespace Osu2Saber.Model.Json
     /// </summary>
     public class SaberInfo
     {
-        List<DifficultyLevel> diffLevels = new List<DifficultyLevel>();
+        List<DifficultyBeatmapSet> diffSets = new List<DifficultyBeatmapSet>() { 
+			new DifficultyBeatmapSet() {
+				_beatmapCharacteristicName = "Standard"
+			}
+		};
 
-        public string songName;
-        public string songSubName;
-        public string authorName;
-        public int beatsPerMinute;
-        public int previewStartTime;
-        public int previewDuration;
-        public string coverImagePath;
-        public string environmentName;
-        public IReadOnlyList<DifficultyLevel> difficultyLevels => diffLevels;
+		public string _version;
+        public string _songName;
+        public string _songSubName;
+        public string _songAuthorName;
+		public string _levelAuthorName = "osu2saber";
+
+		public int _beatsPerMinute;
+        public int _previewStartTime;
+        public int _previewDuration;
+        public string _coverImageFilename;
+        public string _environmentName;
+
+		public string _comment = "Map created with Osu2Saber by tmokmss (fixed by Ivan_Alone)";
+
+		public int _shuffle;
+		public double _shufflePeriod;
+
+		public int _songTimeOffset;
+
+		public string _songFilename;
+
+		public IReadOnlyList<DifficultyBeatmapSet> _difficultyBeatmapSets => diffSets;
 
         public void AddDifficultyLevels(
-            string difficulty, int difficultyRank, string audioPath,
-            string jsonPath, int offset)
+            string difficulty, int difficultyRank, 
+            string jsonPath, int offset, string difficultyName)
         {
             var difficultyLevel = new DifficultyLevel
             {
-                difficulty = difficulty,
-                difficultyRank = difficultyRank,
-                audioPath = audioPath,
-                jsonPath = jsonPath,
-                offset = offset
+                _difficulty = difficulty,
+                _difficultyRank = difficultyRank,
+                _beatmapFilename = jsonPath,
+                _noteJumpStartBeatOffset = offset
             };
-            diffLevels.Add(difficultyLevel);
+			difficultyLevel.setDifficultyName(difficultyName.Length > 0 ? difficultyName : difficulty);
+			diffSets[0].Add(difficultyLevel);
         }
 
         public void ChangeAudioPath(string audioPath)
         {
-            foreach (var diffLevel in diffLevels)
-            {
-                diffLevel.audioPath = audioPath;
-            }
-        }
+			this._songFilename = audioPath;
+		}
     }
 
     public class DifficultyLevel
     {
-        public string difficulty;
-        public int difficultyRank;
-        public string audioPath;
-        public string jsonPath;
-        public string madeby = "osu2saber";
-        public int offset;
-    }
+        public string _difficulty;
+        public int _difficultyRank;
+        public string _beatmapFilename;
+        public int _noteJumpStartBeatOffset;
+		public int _noteJumpSpeed = 10;
+
+		public CustomData _customData = new CustomData();
+		public void setDifficultyName(String name)
+		{
+			_customData._difficultyLabel = name;
+		}
+	}
+
+	public class DifficultyBeatmapSet
+	{
+		List<DifficultyLevel> diffLevels = new List<DifficultyLevel>();
+		public string _beatmapCharacteristicName;
+		public IReadOnlyList<DifficultyLevel> _difficultyBeatmaps => diffLevels;
+		public void Add(DifficultyLevel lvl) {
+			diffLevels.Add(lvl);
+		}
+	}
+	public class CustomData
+	{
+		public string _difficultyLabel = "";
+	}
 }
+

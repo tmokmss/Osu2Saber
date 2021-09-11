@@ -1,22 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using osuBMParser;
-using Newtonsoft.Json;
-using System.IO;
+﻿using Newtonsoft.Json;
 using Osu2Saber.Model.Algorithm;
 using Osu2Saber.Model.Json;
+using osuBMParser;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace Osu2Saber.Model
 {
-    /// <summary>
-    /// This class generates info.json and [difficulty].json files from an.osu file.
-    /// </summary>
-    class Osu2BsConverter
-    {
-        static readonly string MapDirName = "output";
+	/// <summary>
+	/// This class generates info.dat and [difficulty].dat files from an.osu file.
+	/// </summary>
+	class Osu2BsConverter
+	{
+		public static string SystemVersion { get; } = "0.7.3";
+		public static string WindowName { get; } = "Osu2Saber v" + SystemVersion + " by tmokmss (fixed by Ivan_Alone)";
+
+		static readonly string MapDirName = "output";
         static Formatting formatting = Formatting.Indented;
         static string workDir;
         public static string WorkDir
@@ -30,9 +32,13 @@ namespace Osu2Saber.Model
         }
         public static double MinimumDifficulty { set; get; } = 0;
         public static double MaximumDifficulty { set; get; } = 10;
-        public static bool PreferHarder { set; get; } = true;
+		// Enables difficulty selector in configuration menu
+		// Difficulti calculation is not realized yet! Must be "false" untill will realized!
+		public static bool IsDifficultyEnabled { get; } = false;
+		public static bool PreferHarder { set; get; } = true;
 
-        const string InfoFileName = "info.json";
+
+		const string InfoFileName = "info.dat";
         const int MaxNumOfBeatmap = 5;
 
         SaberInfo info;
@@ -68,11 +74,11 @@ namespace Osu2Saber.Model
         public void GenerateInfoFile(string audioFileName)
         {
             info.ChangeAudioPath(audioFileName);
-            var infoJson = JsonConvert.SerializeObject(info, formatting);
+            var infoDat = JsonConvert.SerializeObject(info, formatting);
             var infoPath = Path.Combine(OutDir, InfoFileName);
             using (var sw = new StreamWriter(infoPath, false, Encoding.UTF8))
             {
-                sw.Write(infoJson);
+                sw.Write(infoDat);
             }
         }
 
@@ -91,8 +97,8 @@ namespace Osu2Saber.Model
         {
             var org = beatmaps[index];
             var map = GenerateMap(org);
-            var jsonPath = AddDifficulty(index);
-            var mapPath = Path.Combine(OutDir, jsonPath);
+            var datPath = AddDifficulty(org, index);
+            var mapPath = Path.Combine(OutDir, datPath);
             using (var sw = new StreamWriter(mapPath, false, Encoding.UTF8))
             {
                 sw.Write(map);
@@ -106,53 +112,52 @@ namespace Osu2Saber.Model
 
             info = new SaberInfo
             {
-                songName = org.Title,
-                songSubName = org.Source,
-                authorName = org.Artist,
-                beatsPerMinute = CalcOriginalBPM(org),
-                previewStartTime = org.PreviewTime / 1000,
-                previewDuration = 10,
-                coverImagePath = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
-                //environmentName = "DefaultEnvironment", // There is "NiceEnvironment" too
-                environmentName = "NiceEnvironment", // I personally prefer this
-            };
+				_version = "2.0.0",
+                _songName = org.Title,
+                _songSubName = org.Source,
+                _songAuthorName = org.Artist,
+                _beatsPerMinute = CalcOriginalBPM(org),
+                _previewStartTime = org.PreviewTime / 1000,
+                _previewDuration = 10,
+                _coverImageFilename = Path.ChangeExtension(org.ImageFileName, ThumbnailGenerator.DefaultExtension),
+				//_environmentName = "DefaultEnvironment", // There is "NiceEnvironment" too
+				_environmentName = "NiceEnvironment", // I personally prefer this
+				_shuffle = 0,
+				_shufflePeriod = 0.5,
+				_songTimeOffset = 0,
+			};
 
             AudioPath = Path.Combine(OrgDir, org.AudioFileName);
             ImagePath = Path.Combine(OrgDir, org.ImageFileName);
         }
 
-        string AddDifficulty(int index)
-        {
-            var (diff, rank) = DetermineMapDifficulty(index);
-            var difficulty = diff;
-            var difficultyRank = rank;
-            var audioPath = "";  // determined later
-            var jsonPath = diff + ".json";
-            var offset = 0;
-            info.AddDifficultyLevels(difficulty, difficultyRank, audioPath, jsonPath, offset);
-            return jsonPath;
-        }
+		string AddDifficulty(Beatmap org, int index)
+		{
+			var (diff, rank) = DetermineMapDifficulty(index);
+			var difficulty = diff;
+			var difficultyRank = rank;
+			var datPath = diff + ".dat";
+			var offset = 0;
+			info.AddDifficultyLevels(difficulty, difficultyRank, datPath, offset, org.Version);
+			return datPath;
+		}
 
         string GenerateMap(Beatmap org)
         {
             var map = new SaberBeatmap()
             {
-                origin = org.Version,
-                _version = "1.5.0",
-                _beatsPerMinute = CalcOriginalBPM(org),
-                _beatsPerBar = 16,
-                _noteJumpSpeed = 10,
-                _shuffle = 0,
-                _shufflePeriod = 0.5,
+				_osuOriginName = org.Version,
+                _version = "2.0.0",
             };
+			map.linkInfo(info);
             var ca = new ConvertAlgorithm(org, map);
             ca.Convert();
 
             map._events = ca.Events;
             map._obstacles = ca.Obstacles;
             map._notes = ca.Notes;
-            var json = JsonConvert.SerializeObject(map, formatting);
-            return json;
+			var dat = JsonConvert.SerializeObject(map, formatting);
+            return dat;
         }
 
         int CalcOriginalBPM(Beatmap org)

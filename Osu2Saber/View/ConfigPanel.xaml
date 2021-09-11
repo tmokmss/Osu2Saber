@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Osu2Saber.View"
              xmlns:ViewModel="clr-namespace:Osu2Saber.ViewModel"
-             mc:Ignorable="d" Height="264" Width="258">
+             mc:Ignorable="d" Height="264" Width="258" IsEnabled="{Binding IsPanelActive}">
     <UserControl.Resources>
         <ViewModel:ConfigPanelViewModel x:Key="vm" />
     </UserControl.Resources>
@@ -13,20 +13,22 @@
         <Binding Source="{StaticResource vm}" />
     </UserControl.DataContext>
     <Grid Background="#FFF0EBEB" >
-        <Label Content="Preferred Difficulty" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.289,0.019" Visibility="Hidden"/>
-        <Label Content="Min." HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.394,0.25" Visibility="Hidden"/>
-        <Slider Value="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Margin="0,42,109,0" VerticalAlignment="Top" Width="94" Maximum="{Binding MaximumDifficulty}" Visibility="Hidden"/>
-        <TextBox Text="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,42,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" RenderTransformOrigin="0.673,1.457" Visibility="Hidden"/>
-        <Slider Value="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Margin="0,73,109,0" VerticalAlignment="Top" Width="94" Minimum="{Binding MinimumDifficulty}" Visibility="Hidden"/>
-        <TextBox Text="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Height="23" Margin="0,73,77,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" Visibility="Hidden"/>
-        <Label Content="Max." HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
-        <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
-        <CheckBox IsChecked="{Binding HandleHitSlider}" Content="Don't ignore Hit Slider" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top" ToolTip="By default, hit sliders are ignored because they make a map too difficult. However, some maps get better with them. Just try it!"/>
-        <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No cut-direction &amp; scattared-placement" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattared placement"/>
-        <Label Content="Includes:" HorizontalAlignment="Left" Margin="10,184,0,0" VerticalAlignment="Top" Width="102" Height="27"/>
-        <CheckBox IsChecked="{Binding IncludeTaiko}" Content="Taiko" HorizontalAlignment="Left" Margin="70,190,0,0" VerticalAlignment="Top"/>
-        <CheckBox IsChecked="{Binding IncludeCtB}" Content="CtB" HorizontalAlignment="Left" Margin="128,190,0,0" VerticalAlignment="Top"/>
-        <CheckBox IsChecked="{Binding IncludeMania}" Content="mania" HorizontalAlignment="Left" Margin="178,190,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding DontOpenDirectory}" Content="Do not open output directory" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" ToolTip="Do not open output directory when convertation is done"/>
+        <CheckBox IsChecked="{Binding PreferHarder}" Content="Prefer harder maps" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" ToolTip="Prioritize harder beatmaps when there're more than 5 beatmaps"/>
+        <CheckBox IsChecked="{Binding HandleHitSlider}" Content="Don't ignore Hit Slider" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" ToolTip="By default, hit sliders are ignored because they make a map too difficult. However, some maps get better with them. Just try it!"/>
+        <CheckBox IsChecked="{Binding NoDirectionAndPlacement}" Content="No cut-direction &amp; scattared-placement" HorizontalAlignment="Left" Margin="10,104,0,0" VerticalAlignment="Top" ToolTip="For mappers, this option generates only notes without setting any cut direction or scattared placement"/>
+        <Label Content="Includes:" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" Width="102" Height="27"/>
+        <CheckBox IsChecked="{Binding IncludeTaiko}" Content="Taiko" HorizontalAlignment="Left" Margin="70,130,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding IncludeCtB}" Content="CtB" HorizontalAlignment="Left" Margin="128,130,0,0" VerticalAlignment="Top"/>
+        <CheckBox IsChecked="{Binding IncludeMania}" Content="mania" HorizontalAlignment="Left" Margin="178,130,0,0" VerticalAlignment="Top"/>
 
+        <Label Content="Preferred Difficulty" HorizontalAlignment="Left" Margin="37,156,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.289,0.019" IsEnabled="{Binding IsDifficultyEnabled}" />
+        <Label Content="Min." HorizontalAlignment="Left" Margin="37,184,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.394,0.25" IsEnabled="{Binding IsDifficultyEnabled}" />
+        <Slider Value="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Margin="0,188,82,0" VerticalAlignment="Top" Width="94" Maximum="{Binding MaximumDifficulty}" IsEnabled="{Binding IsDifficultyEnabled}"/>
+        <TextBox Text="{Binding MinimumDifficulty}" HorizontalAlignment="Right" Height="18" Margin="0,188,50,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" RenderTransformOrigin="0.673,1.457" IsEnabled="{Binding IsDifficultyEnabled}"/>
+        <Slider Value="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Margin="0,214,82,0" VerticalAlignment="Top" Width="94" Minimum="{Binding MinimumDifficulty}" IsEnabled="{Binding IsDifficultyEnabled}" />
+        <TextBox Text="{Binding MaximumDifficulty}" HorizontalAlignment="Right" Height="18" Margin="0,214,50,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="26" IsEnabled="{Binding IsDifficultyEnabled}" />
+        <Label Content="Max." HorizontalAlignment="Left" Margin="37,206,0,0" VerticalAlignment="Top" IsEnabled="{Binding IsDifficultyEnabled}" />
+        <Label ToolTip="Select preferred difficulty of Osu! beatmaps to convert in Beat Saber. Is NOT realized yet." Margin="37,160,38,28"/>
     </Grid>
 </UserControl>

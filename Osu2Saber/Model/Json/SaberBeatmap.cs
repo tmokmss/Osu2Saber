@@ -15,20 +15,26 @@ namespace Osu2Saber.Model.Json
     /// https://docs.google.com/spreadsheets/d/1vCTlDvx0ZW8NkkZBYW6ecvXaVRxDUKX7QIoah9PCp_c/htmlview
     /// </summary>
     public class SaberBeatmap
-    {
-        public string origin;
+	{
+
+		private SaberInfo info;
+		public string _osuOriginName;
         public string _version;
-        public int _beatsPerMinute;
-        public int _beatsPerBar;
-        public int _noteJumpSpeed;
-        public int _shuffle;
-        public double _shufflePeriod;
-        public List<Event> _events;
+		public string _comment = "Beatmap created with Osu2Saber by tmokmss (fixed by Ivan_Alone)";
+		public List<Event> _events;
         public List<Note> _notes;
         public List<Obstacle> _obstacles;
-    }
 
-    public class Event
+		public int getBPM() {
+			return this.info._beatsPerMinute;
+		}
+		public void linkInfo(SaberInfo info)
+		{
+			this.info = info;
+		}
+	}
+
+	public class Event
     {
         public double _time;
         public int _type;

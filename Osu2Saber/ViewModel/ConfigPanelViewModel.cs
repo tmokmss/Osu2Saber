@@ -10,8 +10,26 @@ using Osu2Saber.Model.Algorithm;
 namespace Osu2Saber.ViewModel
 {
     class ConfigPanelViewModel : BindableBase
-    {
-        public double MaximumDifficulty
+	{
+		public static ConfigPanelViewModel instance;
+
+		public ConfigPanelViewModel() {
+			instance = this;
+		}
+
+		bool isConfigPanelActive = true;
+		public bool IsPanelActive
+		{
+			set
+			{
+
+				isConfigPanelActive = value;
+				RaisePropertyChanged();
+			}
+			get => isConfigPanelActive;
+		}
+
+		public double MaximumDifficulty
         {
             set
             {
@@ -29,9 +47,13 @@ namespace Osu2Saber.ViewModel
                 RaisePropertyChanged();
             }
             get => Osu2BsConverter.MinimumDifficulty;
-        }
+		}
+		public bool IsDifficultyEnabled
+		{
+			get => Osu2BsConverter.IsDifficultyEnabled;
+		}
 
-        public bool PreferHarder
+		public bool PreferHarder
         {
             set { Osu2BsConverter.PreferHarder = value; }
             get => Osu2BsConverter.PreferHarder;
@@ -59,12 +81,18 @@ namespace Osu2Saber.ViewModel
         {
             set { BatchProcessor.IncludeCtB = value; }
             get => BatchProcessor.IncludeCtB;
-        }
+		}
 
-        public bool IncludeMania
-        {
-            set { BatchProcessor.IncludeMania = value; }
-            get => BatchProcessor.IncludeMania;
-        }
-    }
+		public bool IncludeMania
+		{
+			set { BatchProcessor.IncludeMania = value; }
+			get => BatchProcessor.IncludeMania;
+		}
+
+		public bool DontOpenDirectory
+		{
+			set { BatchProcessor.DontOpenDirectory = value; }
+			get => BatchProcessor.DontOpenDirectory;
+		}
+	}
 }
