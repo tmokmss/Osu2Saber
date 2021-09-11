@@ -11,7 +11,7 @@ namespace Osu2Saber.ViewModel
 {
     class ConfigPanelViewModel : BindableBase
 	{
-		public static ConfigPanelViewModel instance;
+		public static ConfigPanelViewModel instance = new ConfigPanelViewModel();;
 
 		public ConfigPanelViewModel() {
 			instance = this;
